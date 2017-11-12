@@ -1,0 +1,130 @@
+ocio_profile_version: 1
+
+search_path: luts:looks
+strictparsing: true
+luma: [0.2126, 0.7152, 0.0722]
+
+roles:
+  color_picking: OpenAgX Log
+  color_timing: OpenAgX Log
+  compositing_log: OpenAgX Log
+  data: Non-Colour Data
+  default: OpenAgX Log
+  matte_paint: OpenAgX Log
+  reference: OpenAgX Linear
+  scene_linear: OpenAgX Linear
+  texture_paint: OpenAgX Log
+
+displays:
+  sRGB 2.2 Standard:
+    - !<View> {name: OpenAgX Log, colorspace: OpenAgX Log}
+
+active_displays: [sRGB 2.2 Standard]
+active_views: [OpenAgX Log]
+
+looks:
+  - !<Look>
+    name: OpenAgX Contrast 1.25
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.25
+    transform: !<FileTransform> {src: openagx_1.25, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 1.35
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.35
+    transform: !<FileTransform> {src: openagx_1.35, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 1.45
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.45
+    transform: !<FileTransform> {src: openagx_1.45, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 1.65
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.65
+    transform: !<FileTransform> {src: openagx_1.65, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 1.75
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.75
+    transform: !<FileTransform> {src: openagx_1.75, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 1.85
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.85
+    transform: !<FileTransform> {src: openagx_1.85, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 1.95
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 1.95
+    transform: !<FileTransform> {src: openagx_1.95, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 2.05
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 2.05
+    transform: !<FileTransform> {src: openagx_2.05, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 2.15
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 2.15
+    transform: !<FileTransform> {src: openagx_2.15, interpolation: linear}
+
+  - !<Look>
+    name: OpenAgX Contrast 2.25
+    process_space: OpenAgX Log
+    description: |
+      OpenAgX Contrast level 2.25
+    transform: !<FileTransform> {src: openagx_2.25, interpolation: linear}
+
+
+
+colorspaces:
+  - !<ColorSpace>
+    name: OpenAgX Linear
+    family: Core
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      OpenAgX scene referred linear reference space
+    isdata: false
+    allocation: lg2
+    allocationvars: [-9.47393, 7.52607]
+
+  - !<ColorSpace>
+    name: Non-Colour Data
+    family: Core
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Non-Colour Data
+    isdata: true
+    allocation: uniform
+
+  - !<ColorSpace>
+    name: OpenAgX Log
+    family: Transfer
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      OpenAgX Log
+    isdata: false
+    allocation: uniform
+    allocationvars: [-9.47393, 7.52607]
+    from_reference: !<AllocationTransform> {allocation: lg2, vars: [-9.47393, 7.52607]}
