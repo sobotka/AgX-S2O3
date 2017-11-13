@@ -24,74 +24,74 @@ active_views: [OpenAgX Log]
 
 looks:
   - !<Look>
-    name: OpenAgX Contrast 1.25
+    name: OpenAgX Contrast 1.19175359259
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.25
-    transform: !<FileTransform> {src: openagx_1.25, interpolation: linear}
+      OpenAgX Contrast level 1.19175359259
+    transform: !<FileTransform> {src: openagx_1.19175359259, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 1.35
+    name: OpenAgX Contrast 1.30322537284
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.35
-    transform: !<FileTransform> {src: openagx_1.35, interpolation: linear}
+      OpenAgX Contrast level 1.30322537284
+    transform: !<FileTransform> {src: openagx_1.30322537284, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 1.45
+    name: OpenAgX Contrast 1.42814800674
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.45
-    transform: !<FileTransform> {src: openagx_1.45, interpolation: linear}
+      OpenAgX Contrast level 1.42814800674
+    transform: !<FileTransform> {src: openagx_1.42814800674, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 1.65
+    name: OpenAgX Contrast 1.56968557712
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.65
-    transform: !<FileTransform> {src: openagx_1.65, interpolation: linear}
+      OpenAgX Contrast level 1.56968557712
+    transform: !<FileTransform> {src: openagx_1.56968557712, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 1.75
+    name: OpenAgX Contrast 1.73205080757
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.75
-    transform: !<FileTransform> {src: openagx_1.75, interpolation: linear}
+      OpenAgX Contrast level 1.73205080757
+    transform: !<FileTransform> {src: openagx_1.73205080757, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 1.85
+    name: OpenAgX Contrast 1.92098212697
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.85
-    transform: !<FileTransform> {src: openagx_1.85, interpolation: linear}
+      OpenAgX Contrast level 1.92098212697
+    transform: !<FileTransform> {src: openagx_1.92098212697, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 1.95
+    name: OpenAgX Contrast 2.14450692051
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 1.95
-    transform: !<FileTransform> {src: openagx_1.95, interpolation: linear}
+      OpenAgX Contrast level 2.14450692051
+    transform: !<FileTransform> {src: openagx_2.14450692051, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 2.05
+    name: OpenAgX Contrast 2.41421356237
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 2.05
-    transform: !<FileTransform> {src: openagx_2.05, interpolation: linear}
+      OpenAgX Contrast level 2.41421356237
+    transform: !<FileTransform> {src: openagx_2.41421356237, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 2.15
+    name: OpenAgX Contrast 2.74747741945
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 2.15
-    transform: !<FileTransform> {src: openagx_2.15, interpolation: linear}
+      OpenAgX Contrast level 2.74747741945
+    transform: !<FileTransform> {src: openagx_2.74747741945, interpolation: linear}
 
   - !<Look>
-    name: OpenAgX Contrast 2.25
+    name: OpenAgX Contrast 3.17159480236
     process_space: OpenAgX Log
     description: |
-      OpenAgX Contrast level 2.25
-    transform: !<FileTransform> {src: openagx_2.25, interpolation: linear}
+      OpenAgX Contrast level 3.17159480236
+    transform: !<FileTransform> {src: openagx_3.17159480236, interpolation: linear}
 
 
 

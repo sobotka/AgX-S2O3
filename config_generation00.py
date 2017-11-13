@@ -165,7 +165,18 @@ if __name__ == "__main__":
     colorspace.setIsData(True)
     config.addColorSpace(colorspace)
 
-    configSlopes = [1.25, 1.35, 1.45, 1.65, 1.75, 1.85, 1.95, 2.05, 2.15, 2.25]
+    configSlopes = [
+        numpy.tan(numpy.deg2rad(50.0)),
+        numpy.tan(numpy.deg2rad(52.5)),
+        numpy.tan(numpy.deg2rad(55.0)),
+        numpy.tan(numpy.deg2rad(57.5)),
+        numpy.tan(numpy.deg2rad(60.0)),
+        numpy.tan(numpy.deg2rad(62.5)),
+        numpy.tan(numpy.deg2rad(65.0)),
+        numpy.tan(numpy.deg2rad(67.5)),
+        numpy.tan(numpy.deg2rad(70.0)),
+        numpy.tan(numpy.deg2rad(72.5))
+        ]
 
     for slope in configSlopes:
         curveParams = {"linearSlope": slope,
@@ -196,9 +207,10 @@ if __name__ == "__main__":
                         interpolation=PyOpenColorIO.Constants.INTERP_LINEAR)
         look.setTransform(transform)
         config.addLook(look)
-        # pyplot.plot(x_base, y_base, "x", linearLUT, list(outputLUT), '-')
-        # pyplot.show()
+        pyplot.plot(7./17., (pow(0.18, 1./2.2)), "x", linearLUT,
+                    list(outputLUT), '-')
 
+    pyplot.savefig("OpenAgX.JPG")
     # Add base AgX shaper / log encoding
     colorspace = PyOpenColorIO.ColorSpace()
     colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(

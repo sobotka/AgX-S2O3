@@ -15,7 +15,7 @@ def calculateYfromXQuadratic(cP, inX):
                 "Invalid number of control points for a quadratic curve."
             )
 
-        for index, curCP in enumerate(cP):
+        for curCP in cP:
             if len(curCP) != 3:
                 raise ValueError(
                     "Invalid number of control points for a quadratic curve.\n"
@@ -23,33 +23,37 @@ def calculateYfromXQuadratic(cP, inX):
                     "section."
                 )
 
-            coefficients = [
-                curCP[0][0] - (2. * curCP[1][0]) + curCP[2][0],
-                (2. * curCP[1][0]) - (2. * curCP[0][0]),
-                curCP[0][0] - inValue
-            ]
+            if curCP[0][0] <= inValue <= curCP[2][0]:
+                if inValue == 1.:
+                    yield 1.
+                    break
 
-            roots = numpy.roots(coefficients)
-            correct_root = None
+                coefficients = [
+                    curCP[0][0] - (2. * curCP[1][0]) + curCP[2][0],
+                    (2. * curCP[1][0]) - (2. * curCP[0][0]),
+                    curCP[0][0] - inValue
+                ]
 
-            for root in roots:
-                if numpy.isreal(root) and 0 <= root <= 1:
-                    correct_root = root
+                roots = numpy.roots(coefficients)
+                correct_root = None
 
-            if correct_root is not None:
-                root_t = correct_root
-                outY = (((1. - root_t)**2. * curCP[0][1]) +
-                        (2. * (1. - root_t) * root_t * curCP[1][1]) +
-                        (root_t**2. * curCP[2][1]))
-                break
+                for root in roots:
+                    if numpy.isreal(root) and 0. <= root <= 1.:
+                        correct_root = root
 
-        if correct_root is None:
-            raise ValueError(
-                "No valid root found for coefficients. Invalid curve or "
-                "input x value."
-            )
+                if correct_root is not None:
+                    root_t = correct_root
+                    outY = (((1. - root_t)**2. * curCP[0][1]) +
+                            (2. * (1. - root_t) * root_t * curCP[1][1]) +
+                            (root_t**2. * curCP[2][1]))
+                    yield outY
+                    break
 
-        yield outY
+                if correct_root is None:
+                    raise ValueError(
+                        "No valid root found for coefficients. Invalid curve or "
+                        "input x value."
+                    )
 
 
 def calculateYfromXCubic(cP, inX):
@@ -79,7 +83,7 @@ def calculateYfromXCubic(cP, inX):
             correct_root = None
 
             for root in roots:
-                if numpy.isreal(root) and 0 <= root <= 1:
+                if numpy.isreal(root) and 0. <= root <= 1.:
                     correct_root = root
 
             if correct_root is not None:
