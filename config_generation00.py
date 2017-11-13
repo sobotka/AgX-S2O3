@@ -214,6 +214,13 @@ if __name__ == "__main__":
     # setIsData(False)
     colorspace.setIsData(False)
     colorspace.setName("OpenAgX Log")
+    colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(
+                                             minimumExposure,
+                                             linMiddleGrey)),
+                                  numpy.log2(calculateStopsToLin(
+                                             maximumExposure,
+                                             linMiddleGrey))])
+    colorspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
     transform = OCIOCreateAllocationTransform(
         numpy.log2(calculateStopsToLin(minimumExposure, linMiddleGrey)),
         numpy.log2(calculateStopsToLin(maximumExposure, linMiddleGrey)),

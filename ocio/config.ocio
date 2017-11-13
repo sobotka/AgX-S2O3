@@ -125,6 +125,6 @@ colorspaces:
     description: |
       OpenAgX Log
     isdata: false
-    allocation: uniform
+    allocation: lg2
     allocationvars: [-9.47393, 7.52607]
     from_reference: !<AllocationTransform> {allocation: lg2, vars: [-9.47393, 7.52607]}
