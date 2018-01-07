@@ -17,30 +17,30 @@ def as_numeric(obj, as_type=numpy.float64):
 
 def calculateYfromXQuadratic(cP, inValues):
     inValues = numpy.asarray(inValues)
-    outY = numpy.zeros(inValues.size)
+    outY = numpy.zeros(inValues.shape[0])
     cP = numpy.asarray(cP)
 
-    for index, inValue in numpy.ndenumerate(inValues):
-        if len(cP) <= 0:
-            raise ValueError(
-                "Invalid number of control points for a quadratic curve.\n"
-                "\tQuadratic curves must have at least one set of three "
-                "control points."
-            )
+    if cP.shape[0] <= 0:
+        raise ValueError(
+            "Invalid number of control points for a quadratic curve.\n"
+            "\tQuadratic curves must have at least one set of three "
+            "control points."
+        )
 
+    if cP.shape[1] != 3:
+        raise ValueError(
+            "Invalid number of control points for a quadratic curve.\n"
+            "\tQuadratic curves require three control points per "
+            "section."
+        )
+
+    for index in range(inValues.shape[0]):
         for curCP in cP:
-            if len(curCP) != 3:
-                raise ValueError(
-                    "Invalid number of control points for a quadratic curve.\n"
-                    "\tQuadratic curves require three control points per "
-                    "section."
-                )
-
-            if curCP[0][0] <= inValue <= curCP[2][0]:
+            if curCP[0][0] <= inValues[index] <= curCP[2][0]:
                 coefficients = [
                     curCP[0][0] - (2. * curCP[1][0]) + curCP[2][0],
                     (2. * curCP[1][0]) - (2. * curCP[0][0]),
-                    curCP[0][0] - inValue
+                    curCP[0][0] - inValues[index]
                 ]
 
                 roots = numpy.roots(coefficients)
@@ -49,19 +49,18 @@ def calculateYfromXQuadratic(cP, inValues):
                 for root in roots:
                     if numpy.isreal(root) and (0. <= root < 1.):
                         correct_root = root
-                    elif inValue == 1.:
+                    elif inValues[index] == 1.:
                         correct_root = 1.
 
                 if correct_root is not None:
                     root_t = correct_root
-                    outV = (((1. - root_t)**2. * curCP[0][1]) +
-                            (2. * (1. - root_t) * root_t * curCP[1][1]) +
-                            (root_t**2. * curCP[2][1]))
-                    outY[index] = outV
+                    outY[index] = (
+                        ((1. - root_t)**2. * curCP[0][1]) +
+                        (2. * (1. - root_t) * root_t * curCP[1][1]) +
+                        (root_t**2. * curCP[2][1]))
                     break
 
                 if correct_root is None:
-                    print("*** ERROR ***: inValue[", index, "]: ", inValue)
                     raise ValueError(
                         "No valid root found for coefficients. Invalid curve "
                         "or input x value."
@@ -71,30 +70,30 @@ def calculateYfromXQuadratic(cP, inValues):
 
 def calculateYfromXCubic(cP, inValues):
     inValues = numpy.asarray(inValues)
-    outY = numpy.zeros(inValues.size)
+    outY = numpy.zeros(inValues.shape[0])
     cP = numpy.asarray(cP)
 
-    for index, inValue in numpy.ndenumerate(inValues):
-        if len(cP) <= 0:
-            raise ValueError(
-                "Invalid number of control points for a cubic curve."
-            )
+    if cP.shape[0] <= 0:
+        raise ValueError(
+            "Invalid number of control points for a cubic curve."
+        )
 
+    if cP.shape[0] != 4:
+        raise ValueError(
+            "Invalid number of control points for a cubic curve.\n"
+            "\tCubic curves require four control points per "
+            "section."
+        )
+
+    for index in range(inValues.shape[0]):
         for curCP in cP:
-            if len(curCP) != 4:
-                raise ValueError(
-                    "Invalid number of control points for a cubic curve.\n"
-                    "\tCubic curves require four control points per "
-                    "section."
-                )
-
-            if curCP[0][0] <= inValue <= curCP[3][0]:
+            if curCP[0][0] <= inValues[index] <= curCP[3][0]:
                 coefficients = [
                     -curCP[0][0] + 3. * curCP[1][0] - 3. * curCP[2][0] +
                     curCP[3][0],
                     3. * curCP[0][0] - 6 * curCP[1][0] + 3 * curCP[2][0],
                     -3 * curCP[0][0] + 3 * curCP[1][0],
-                    curCP[0][0] - inValue
+                    curCP[0][0] - inValues[index]
                 ]
 
                 roots = numpy.roots(coefficients)
@@ -116,8 +115,7 @@ def calculateYfromXCubic(cP, inValues):
                 if correct_root is None:
                     raise ValueError(
                         "No valid root found for coefficients. Invalid curve "
-                        "or input x value. Control Point: ", curCP,
-                        " Index Value[", index, "]: ", inValue[index]
+                        "or input x value."
                     )
 
     return as_numeric(outY)
