@@ -78,7 +78,7 @@ def calculateYfromXCubic(cP, inValues):
             "Invalid number of control points for a cubic curve."
         )
 
-    if cP.shape[0] != 4:
+    if cP.shape[1] != 4:
         raise ValueError(
             "Invalid number of control points for a cubic curve.\n"
             "\tCubic curves require four control points per "
