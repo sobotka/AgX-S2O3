@@ -136,7 +136,7 @@ if __name__ == "__main__":
     config.setRole(PyOpenColorIO.Constants.ROLE_COMPOSITING_LOG,
                    "OpenAgX Log")
     config.setRole(PyOpenColorIO.Constants.ROLE_COLOR_PICKING,
-                   "OpenAgX Log")
+                   "Native 2.2 Power Function")
     config.setRole(PyOpenColorIO.Constants.ROLE_DATA, "Non-Colour Data")
     config.setRole(PyOpenColorIO.Constants.ROLE_DEFAULT,
                    "OpenAgX Log")
@@ -284,6 +284,6 @@ if __name__ == "__main__":
         config.addDisplay("sRGB 2.2 Standard", name, colorspace)
 
     config.setActiveDisplays("sRGB 2.2 Standard")
-    config.setActiveViews("OpenAgX Log")
+    config.setActiveViews("Native 2.2 Power Function, OpenAgX Log")
 
     OCIOWriteConfig("ocio", config)

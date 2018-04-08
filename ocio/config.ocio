@@ -5,7 +5,7 @@ strictparsing: true
 luma: [0.2126, 0.7152, 0.0722]
 
 roles:
-  color_picking: OpenAgX Log
+  color_picking: Native 2.2 Power Function
   color_timing: OpenAgX Log
   compositing_log: OpenAgX Log
   data: Non-Colour Data
@@ -21,7 +21,7 @@ displays:
     - !<View> {name: OpenAgX Log, colorspace: OpenAgX Log}
 
 active_displays: [sRGB 2.2 Standard]
-active_views: [OpenAgX Log]
+active_views: [Native 2.2 Power Function, OpenAgX Log]
 
 looks:
   - !<Look>
