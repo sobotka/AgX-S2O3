@@ -17,6 +17,7 @@ roles:
 
 displays:
   sRGB 2.2 Standard:
+    - !<View> {name: Native 2.2 Power Function, colorspace: Native 2.2 Power Function}
     - !<View> {name: OpenAgX Log, colorspace: OpenAgX Log}
 
 active_displays: [sRGB 2.2 Standard]
@@ -116,6 +117,18 @@ colorspaces:
       Non-Colour Data
     isdata: true
     allocation: uniform
+
+  - !<ColorSpace>
+    name: Native 2.2 Power Function
+    family: Transfer
+    equalitygroup: ""
+    bitdepth: 32f
+    description: |
+      Native 2.2 power function
+    isdata: false
+    allocation: lg2
+    allocationvars: [-9.47393, 7.52607]
+    from_reference: !<ExponentTransform> {value: [0.454545, 0.454545, 0.454545, 1]}
 
   - !<ColorSpace>
     name: OpenAgX Log

@@ -122,9 +122,11 @@ if __name__ == "__main__":
         ]
     ])
 
+    print("Creating configuration...")
     config = PyOpenColorIO.Config()
 
     LUT_SEARCH_PATH = ["luts", "looks"]
+    print("Configuring Roles...")
     config.setSearchPath(':'.join(LUT_SEARCH_PATH))
 
     config.setRole(PyOpenColorIO.Constants.ROLE_SCENE_LINEAR, "OpenAgX Linear")
@@ -143,9 +145,7 @@ if __name__ == "__main__":
     config.setRole(PyOpenColorIO.Constants.ROLE_TEXTURE_PAINT,
                    "OpenAgX Log")
 
-    config.addDisplay("sRGB 2.2 Standard", "OpenAgX Log",
-                      "OpenAgX Log")
-
+    print("Creating OpenAgX Linear transform...")
     colorspace = PyOpenColorIO.ColorSpace(family="Core",
                                           name="OpenAgX Linear")
     colorspace.setDescription("OpenAgX scene referred linear reference space")
@@ -159,6 +159,7 @@ if __name__ == "__main__":
     colorspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
     config.addColorSpace(colorspace)
 
+    print("Creating Non-Colour Data transform...")
     colorspace = PyOpenColorIO.ColorSpace(family="Core",
                                           name="Non-Colour Data")
     colorspace.setDescription("Non-Colour Data")
@@ -166,6 +167,7 @@ if __name__ == "__main__":
     colorspace.setIsData(True)
     config.addColorSpace(colorspace)
 
+    print("Creating Looks...")
     configSlopes = [
         numpy.tan(numpy.deg2rad(50.0)),
         numpy.tan(numpy.deg2rad(52.5)),
@@ -216,7 +218,9 @@ if __name__ == "__main__":
                     linearLUT, list(outputLUT), '-')
 
     pyplot.savefig("OpenAgX.JPG")
-    # Add base AgX shaper / log encoding
+
+    print("Creating Native 2.2 Power Function transform...")
+    # Add native 2.2 display power function
     colorspace = PyOpenColorIO.ColorSpace()
     colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(
                                              minimumExposure,
@@ -224,6 +228,29 @@ if __name__ == "__main__":
                                   numpy.log2(calculateStopsToLin(
                                              maximumExposure,
                                              linMiddleGrey))])
+    colorspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
+    colorspace.setName("Native 2.2 Power Function")
+    colorspace.setDescription("Native 2.2 power function")
+    # setEqualityGroup()
+    colorspace.setFamily("Transfer")
+    # setIsData(False)
+    colorspace.setIsData(False)
+    colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(
+                                             minimumExposure,
+                                             linMiddleGrey)),
+                                  numpy.log2(calculateStopsToLin(
+                                             maximumExposure,
+                                             linMiddleGrey))])
+    colorspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
+    transform = PyOpenColorIO.ExponentTransform([1/2.2, 1/2.2, 1/2.2, 1.])
+    colorspace.setTransform(
+        transform,
+        PyOpenColorIO.Constants.COLORSPACE_DIR_FROM_REFERENCE)
+    config.addColorSpace(colorspace)
+
+    print("Creating OpenAgX Log transform...")
+    # Add base AgX shaper / log encoding
+    colorspace = PyOpenColorIO.ColorSpace()
     colorspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
     colorspace.setDescription("OpenAgX Log")
     # setEqualityGroup()
@@ -246,10 +273,14 @@ if __name__ == "__main__":
     colorspace.setTransform(
         transform,
         PyOpenColorIO.Constants.COLORSPACE_DIR_FROM_REFERENCE)
-
     config.addColorSpace(colorspace)
 
-    for name, colorspace in [["OpenAgX Log", "OpenAgX Log"]]:
+    transforms = [
+        ["Native 2.2 Power Function", "Native 2.2 Power Function"],
+        ["OpenAgX Log", "OpenAgX Log"]
+    ]
+
+    for name, colorspace in transforms:
         config.addDisplay("sRGB 2.2 Standard", name, colorspace)
 
     config.setActiveDisplays("sRGB 2.2 Standard")
