@@ -11,6 +11,7 @@ from matplotlib import pyplot
 
 
 if __name__ == "__main__":
+    displayTransfer = 2.2
     minimumExposure = -7.
     maximumExposure = +10.
     linMiddleGrey = 0.18
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     logMax = 1.
     displayMin = 0.
     displayMax = 1.
-    displayGrey = pow(linMiddleGrey, 1./2.2)
+    displayGrey = pow(linMiddleGrey, 1./displayTransfer)
     displayToe = displayMin + (abs(minimumExposure) / dynamicRange *
                                (dynamicRange - latitude) / dynamicRange)
     displayShoulder = displayMax - (maximumExposure / dynamicRange *
@@ -182,7 +183,7 @@ if __name__ == "__main__":
         curveParams = {"linearSlope": slope,
                        "minimumExposure": minimumExposure,
                        "maximumExposure": maximumExposure,
-                       "displayPowerFunction": 2.2,
+                       "displayPowerFunction": displayTransfer,
                        "latitudeStops": latitude,
                        "linearMiddleGrey": linMiddleGrey,
                        "logMinimum": logMin,
@@ -197,18 +198,22 @@ if __name__ == "__main__":
                                   curveParams)
 
         look = PyOpenColorIO.Look()
-        look.setName("OpenAgX Contrast " + str(slope))
-        look.setDescription("OpenAgX Contrast level " + str(slope))
+        look.setName("OpenAgX Contrast " + str(numpy.round(numpy.rad2deg(
+            numpy.arctan(slope)), 1)))
+        look.setDescription("OpenAgX Contrast level " + str(numpy.round(
+            numpy.rad2deg(numpy.arctan(slope)), 1)))
         look.setProcessSpace("OpenAgX Log")
-        lookName = filePrefix + str(slope)
-        lookName.replace(".", "_")
+        lookName = filePrefix + "s" + str(numpy.round(numpy.rad2deg(
+            numpy.arctan(slope)), 1))
+        lookName = lookName.replace(".", "_")
+        lookName += ".spi1d"
         transform = PyOpenColorIO.FileTransform(
                         src=lookName,
                         interpolation=PyOpenColorIO.Constants.INTERP_LINEAR)
         look.setTransform(transform)
         config.addLook(look)
-        pyplot.plot(7./17., (pow(0.18, 1./2.2)), "x", linearLUT,
-                    list(outputLUT), '-')
+        pyplot.plot(7./17., (pow(linMiddleGrey, 1./displayTransfer)), "x",
+                    linearLUT, list(outputLUT), '-')
 
     pyplot.savefig("OpenAgX.JPG")
     # Add base AgX shaper / log encoding

@@ -19,6 +19,10 @@ ILLUMINANT_D65 = numpy.array([
     [0.3127, 0.3290]
 ])
 
+ILLUMINANT_D50 = numpy.array([
+    [0.34567, 0.35850]
+])
+
 PRIMARIES_sRGB = numpy.array([
     [0.6400, 0.3300],
     [0.3000, 0.6000],
@@ -45,37 +49,33 @@ def calculatexyYtoXYZ(xyYPrimaries, valueY=1.):
     return XYZOut
 
 
+def calculateXYZtoxyY(XYZPrimaries):
+    XYZPrimaries = numpy.asarray(XYZPrimaries)
+    xyYOut = numpy.zeros([XYZPrimaries.shape[0], 3])
+    XYZSum = (XYZPrimaries[:, 0] + XYZPrimaries[:, 1] + XYZPrimaries[:, 2])
+    xyYOut[:, 0] = (XYZPrimaries[:, 0] / XYZSum)
+    xyYOut[:, 1] = (XYZPrimaries[:, 1] / XYZSum)
+    xyYOut[:, 2] = XYZPrimaries[:, 1]
+
+    return xyYOut
+
+
 def calculateChromaticAdaptationMatrix(srcWhitePrimaries, destWhitePrimaries,
                                        cadaptMatrix=CADAPT_BRADFORD):
-    srcXYZ = calculatexyYtoXYZ(ILLUMINANT_D65)
+    srcXYZ = calculatexyYtoXYZ(srcWhitePrimaries)
     srcXYZ = numpy.reshape(srcXYZ, [3, ])
-    # srcXYZ = numpy.diag(srcXYZ)
 
     destXYZ = calculatexyYtoXYZ(destWhitePrimaries)
     destXYZ = numpy.reshape(destXYZ, [3, ])
-    # destXYZ = numpy.diag(destXYZ)
 
     srcCone = numpy.dot(cadaptMatrix, srcXYZ)
-    print("srcCone ", srcCone)
-    # srcCone = numpy.diag(srcXYZ)
-
     destCone = numpy.dot(cadaptMatrix, destXYZ)
-    print("destCone ", destCone)
-    # destCone = numpy.diag(destXYZ)
-    # print("destCone ", destCone)
 
     scaledCone = numpy.divide(destCone, srcCone)
-    # scaledCone = numpy.reshape(scaledCone, [1, 3])
-    print("scaledConeDivided ", scaledCone)
-
     scaledCone = numpy.diag(scaledCone)
-    print("diagScaledCone\n", scaledCone)
-    # scaledCone = numpy.reshape(scaledCone, [3, 1])
 
     outMatrix = numpy.dot(numpy.linalg.inv(cadaptMatrix), scaledCone)
     outMatrix = numpy.dot(outMatrix, cadaptMatrix)
-
-    print(outMatrix)
 
     return outMatrix
 
@@ -85,12 +85,12 @@ def writeFilmlikeQuadraticLUT(subdirectory, prefix, LUTsize, curveParams):
         writeLUT = createFilmlikeQuadraticLUT(LUTsize, curveParams)
         currentDirectory = os.path.relpath(".")
 
-        filename = prefix + "s" + str(numpy.rad2deg(
-            numpy.arctan(curveParams["linearSlope"])))
-        filename.replace(".", "_")
+        filename = prefix + "s" + str(numpy.round(numpy.rad2deg(
+            numpy.arctan(curveParams["linearSlope"])), 1))
+        filename = filename.replace(".", "_")
 
         destinationFile = (currentDirectory + "/" + subdirectory + "/" +
-                           filename)
+                           filename + ".spi1d")
 
         if not os.path.exists(os.path.dirname(destinationFile)):
             os.makedirs(os.path.dirname(destinationFile))
