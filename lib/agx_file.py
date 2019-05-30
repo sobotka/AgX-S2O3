@@ -5,6 +5,7 @@
 Defines file utility functions.
 """
 import os
+import errno
 import PyOpenColorIO
 
 

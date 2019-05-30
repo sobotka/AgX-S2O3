@@ -29,19 +29,25 @@ if __name__ == "__main__":
 
     linearSlope = 1.75
 
-    displayIntercept = calculateIntercept(displayGrey, logGrey,
-                                          linearSlope)
+    displayIntercept = calculate_line_y_intercept(
+        displayGrey,
+        logGrey,
+        linearSlope
+    )
 
-    logToe = calculateLog(displayToe, linearSlope, displayIntercept)
-    logShoulder = calculateLog(displayShoulder, linearSlope,
-                               displayIntercept)
+    logToe = calculate_line_y(displayToe, linearSlope, displayIntercept)
+    logShoulder = calculate_line_y(
+        displayShoulder,
+        linearSlope,
+        displayIntercept
+    )
 
     LUTsize = 4096
     linearLUT = numpy.linspace(0., 1., LUTsize)
     #
-    # filmicLUT = numpy.linspace(calculateLogToLin_f(logMin, linMiddleGrey,
+    # filmicLUT = numpy.linspace(calculate_line_yToLin_f(logMin, linMiddleGrey,
     #                            minimumExposure, maximumExposure),
-    #                            calculateLogToLin_f(logMax, linMiddleGrey,
+    #                            calculate_line_yToLin_f(logMax, linMiddleGrey,
     #                            minimumExposure, maximumExposure), LUTsize)
 
     x_base = [
@@ -62,7 +68,7 @@ if __name__ == "__main__":
     controlPoints = numpy.array([
         [
             [logMin, displayMin],
-            [calculateLog(displayMin, linearSlope, displayIntercept),
+            [calculate_line_y(displayMin, linearSlope, displayIntercept),
                 displayMin],
             [logToe, displayToe]
         ],
@@ -73,7 +79,7 @@ if __name__ == "__main__":
         ],
         [
             [logShoulder, displayShoulder],
-            [calculateLog(displayMax, linearSlope, displayIntercept),
+            [calculate_line_y(displayMax, linearSlope, displayIntercept),
                 displayMax],
             [logMax, displayMax]
         ]
@@ -84,13 +90,13 @@ if __name__ == "__main__":
     cubicPoints = numpy.array([
         [
             [logMin, displayMin],
-            [logMin + ((2. / 3.) * (calculateLog(displayMin, linearSlope,
+            [logMin + ((2. / 3.) * (calculate_line_y(displayMin, linearSlope,
              displayIntercept) - logMin)),
              displayMin],
-            [logToe + ((2. / 3.) * (calculateLog(displayMin, linearSlope,
+            [logToe + ((2. / 3.) * (calculate_line_y(displayMin, linearSlope,
              displayIntercept) - logToe)),
              displayToe + ((2. / 3.) * (displayMin - displayToe))],
-            # [calculateLog(displayMin, linearSlope, displayIntercept),
+            # [calculate_line_y(displayMin, linearSlope, displayIntercept),
             #     displayMin],
             [logToe, displayToe]
         ],
@@ -109,13 +115,13 @@ if __name__ == "__main__":
             # Control1X = StartX + (.66 * (ControlX - StartX))
             # Control2X = EndX + (.66 * (ControlX - EndX))
             [logShoulder, displayShoulder],
-            [logShoulder + ((2. / 3.) * (calculateLog(displayMax, linearSlope,
-             displayIntercept) - logShoulder)),
+            [logShoulder + ((2. / 3.) * (calculate_line_y(
+                displayMax, linearSlope, displayIntercept) - logShoulder)),
              displayShoulder + ((2. / 3.) * (displayMax - displayShoulder))],
-            [logMax + ((2. / 3.) * (calculateLog(displayMax, linearSlope,
+            [logMax + ((2. / 3.) * (calculate_line_y(displayMax, linearSlope,
              displayIntercept) - logMax)),
              displayMax + ((2. / 3.) * (displayMax - displayMax))],
-            # [calculateLog(displayMax, linearSlope, displayIntercept),
+            # [calculate_line_y(displayMax, linearSlope, displayIntercept),
             #     displayMax],
             [logMax, displayMax]
         ]
@@ -149,10 +155,10 @@ if __name__ == "__main__":
                                           name="OpenAgX Linear")
     colorspace.setDescription("OpenAgX scene referred linear reference space")
     colorspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-    colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(
+    colorspace.setAllocationVars([numpy.log2(calculate_ev_to_sr(
                                              minimumExposure,
                                              linMiddleGrey)),
-                                  numpy.log2(calculateStopsToLin(
+                                  numpy.log2(calculate_ev_to_sr(
                                              maximumExposure,
                                              linMiddleGrey))])
     colorspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
@@ -213,10 +219,10 @@ if __name__ == "__main__":
     pyplot.savefig("OpenAgX.JPG")
     # Add base AgX shaper / log encoding
     colorspace = PyOpenColorIO.ColorSpace()
-    colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(
+    colorspace.setAllocationVars([numpy.log2(calculate_ev_to_sr(
                                              minimumExposure,
                                              linMiddleGrey)),
-                                  numpy.log2(calculateStopsToLin(
+                                  numpy.log2(calculate_ev_to_sr(
                                              maximumExposure,
                                              linMiddleGrey))])
     colorspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
@@ -226,16 +232,16 @@ if __name__ == "__main__":
     # setIsData(False)
     colorspace.setIsData(False)
     colorspace.setName("OpenAgX Log")
-    colorspace.setAllocationVars([numpy.log2(calculateStopsToLin(
+    colorspace.setAllocationVars([numpy.log2(calculate_ev_to_sr(
                                              minimumExposure,
                                              linMiddleGrey)),
-                                  numpy.log2(calculateStopsToLin(
+                                  numpy.log2(calculate_ev_to_sr(
                                              maximumExposure,
                                              linMiddleGrey))])
     colorspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
     transform = OCIOCreateAllocationTransform(
-        numpy.log2(calculateStopsToLin(minimumExposure, linMiddleGrey)),
-        numpy.log2(calculateStopsToLin(maximumExposure, linMiddleGrey)),
+        numpy.log2(calculate_ev_to_sr(minimumExposure, linMiddleGrey)),
+        numpy.log2(calculate_ev_to_sr(maximumExposure, linMiddleGrey)),
         type=PyOpenColorIO.Constants.ALLOCATION_LG2
         )
     colorspace.setTransform(

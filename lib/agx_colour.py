@@ -50,22 +50,31 @@ def createFilmlikeQuadraticLUT(LUTsize, curveParams):
     displayToe = displayMinimum + (abs(minimumExposure) / dynamicRangeStops *
                                    (dynamicRangeStops - latitudeStops) /
                                    dynamicRangeStops)
-    displayLinearIntercept = calculateIntercept(displayMiddleGrey,
-                                                logMiddleGrey,
-                                                linearSlope)
-    logToe = calculateLog(displayToe, linearSlope, displayLinearIntercept)
+    displayLinearIntercept = calculate_line_y_intercept(
+        displayMiddleGrey,
+        logMiddleGrey,
+        linearSlope
+    )
+    logToe = calculate_line_y(displayToe, linearSlope, displayLinearIntercept)
     displayShoulder = displayMaximum - (maximumExposure / dynamicRangeStops *
                                         (dynamicRangeStops - latitudeStops) /
                                         dynamicRangeStops)
-    logShoulder = calculateLog(displayShoulder, linearSlope,
-                               displayLinearIntercept)
+    logShoulder = calculate_line_y(
+        displayShoulder,
+        linearSlope,
+        displayLinearIntercept
+    )
 
     quadraticControlPoints = numpy.array([
         [
             # Starting Point
             [logMinimum,  displayMinimum],
             # Quadratic Control Point
-            [calculateLog(displayMinimum, linearSlope, displayLinearIntercept),
+            [calculate_line_y(
+                displayMinimum,
+                linearSlope,
+                displayLinearIntercept
+            ),
              displayMinimum],
             # Ending Point
             [logToe, displayToe]
@@ -82,7 +91,11 @@ def createFilmlikeQuadraticLUT(LUTsize, curveParams):
             # Starting Point
             [logShoulder, displayShoulder],
             # Quadratic Control Point
-            [calculateLog(displayMaximum, linearSlope, displayLinearIntercept),
+            [calculate_line_y(
+                displayMaximum,
+                linearSlope,
+                displayLinearIntercept
+            ),
              displayMaximum],
             # Ending Point
             [logMaximum, displayMaximum]
@@ -90,7 +103,7 @@ def createFilmlikeQuadraticLUT(LUTsize, curveParams):
     ])
 
     linearLUT = numpy.linspace(0., 1., LUTsize)
-    outputLUT = calculateYfromXQuadratic(quadraticControlPoints, linearLUT)
+    outputLUT = calculate_y_from_x_quadratic(quadraticControlPoints, linearLUT)
 
     return outputLUT
 
