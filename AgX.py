@@ -215,3 +215,11 @@ def equation_full_curve(x, x_pivot, y_pivot, slope_pivot, power):
     )
 
     return equation_curve(x, x_pivot, y_pivot, slope_pivot, power, scale)
+
+
+def add_view(in_dict, display, view_name, view_transform):
+    if display not in in_dict:
+        in_dict[display] = {}
+    in_dict[display][view_name] = view_transform
+
+    return in_dict
