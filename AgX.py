@@ -218,12 +218,39 @@ def equation_full_curve(x, x_pivot, y_pivot, slope_pivot, power):
     return equation_curve(x, x_pivot, y_pivot, slope_pivot, power, scale)
 
 
-def add_view(in_dict, display, view_name, view_transform):
+def append_view(in_dict, display, view_name, view_transform):
     if display not in in_dict:
         in_dict[display] = {}
     in_dict[display][view_name] = view_transform
 
     return in_dict
+
+
+def add_view(
+    config,
+    family,
+    name,
+    description,
+    transforms=None,
+    referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
+):
+    if transforms is not None:
+        if len(transforms) > 1:
+            transforms = PyOpenColorIO.GroupTransform(transforms)
+        else:
+            transforms = transforms[0]
+
+    view = PyOpenColorIO.ViewTransform(
+        name=name,
+        family=family,
+        description=description,
+        fromReference=transforms,
+        referenceSpace=referencespace
+    )
+
+    config.addViewTransform(view)
+
+    return config, view
 
 
 def add_colourspace(
@@ -238,19 +265,13 @@ def add_colourspace(
     isdata=False,
     debug=False
 ):
-    colourspace_family = family
-    colourspace_name = name
-    colourspace_description = description
-
     colourspace = PyOpenColorIO.ColorSpace(
         referenceSpace=referencespace,
-        family=colourspace_family,
-        name=colourspace_name,
+        family=family,
+        name=name,
         aliases=aliases,
+        description=description,
         isData=isdata
-    )
-    colourspace.setDescription(
-        colourspace_description
     )
 
     if transforms is not None:
@@ -305,7 +326,7 @@ def add_look(
     name,
     transforms,
     description,
-    processSpace="AgX Base",
+    processspace="AgX Base"
 ):
     if len(transforms) > 1:
         transforms = PyOpenColorIO.GroupTransform(transforms)
@@ -314,7 +335,7 @@ def add_look(
 
     look = PyOpenColorIO.Look(
         name=name,
-        processSpace=processSpace,
+        processSpace=processspace,
         transform=transforms,
         description=description
     )

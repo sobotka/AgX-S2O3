@@ -15,25 +15,6 @@ output_config_name = "config.ocio"
 output_LUTs_directory = "./LUTs/"
 LUT_search_paths = ["LUTs"]
 
-supported_displays = {
-    "Display P3": {
-        "Display Native": "Display P3 Display",
-        "AgX": "AgX Display P3 Display"
-    },
-    "sRGB": {
-        "Display Native": "sRGB Display",
-        "AgX": "AgX sRGB Display"
-    },
-    "BT.1886": {
-        "Display Native": "Display P3 Display",
-        "AgX": "AgX BT.1886 Display"
-    },
-    "HDR 1000": {
-        "Display Native": "Display P3 Display",
-        "AgX": "AgX HDR 1000 Display"
-    }
-}
-
 AgX_min_EV = -10.0
 AgX_max_EV = +10.0
 AgX_x_pivot = numpy.abs(AgX_min_EV / (AgX_max_EV - AgX_min_EV))
@@ -45,29 +26,45 @@ if __name__ == "__main__":
 
     config.setSearchPath(":".join(LUT_search_paths))
 
-    # Establish a displays dictionary to track the displays. Append
-    # the respective display at each of the display colourspace definitions
-    # for clarity.
-    displays = {}
-
-    # Establish a colourspaces dictionary for fetching colourspace objects.
-    colourspaces = {}
-
     ####
     # Colourspaces
     ####
 
+    identity_transform = PyOpenColorIO.BuiltinTransform("IDENTITY")
+
     # Define a generic tristimulus linear working space, with assumed
-    # BT.709 primaries and a D65 achromatic point.
+    # BT.709 primaries and a D65 achromatic point, as well as the closed
+    # domain equivalent.
     config, colourspace = AgX.add_colourspace(
         config=config,
         family="Colourspaces",
         name="Linear BT.709",
         description="Open Domain Linear BT.709 Tristimulus",
-        aliases=["Linear", "Linear Tristimulus"]
+        aliases=["Linear", "Linear Tristimulus", "Linear Open Domain"],
+        referencespace=PyOpenColorIO.REFERENCE_SPACE_SCENE
     )
 
-    # AgX
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Colourspaces",
+        name="Linear BT.709 Closed Domain",
+        description="Closed Domain Linear BT.709 Tristimulus",
+        aliases=["Linear Closed Domain", "Linear Tristimulus Closed Domain"],
+        referencespace=PyOpenColorIO.REFERENCE_SPACE_DISPLAY
+    )
+
+    # transform_list = [
+    #     identity_transform
+    # ]
+    # config, view = AgX.add_view(
+    #     config=config,
+    #     name="Identity View",
+    #     family="Utilities",
+    #     description="Identity view transform",
+    #     transforms=transform_list
+    # )
+
+    # AgX Log
     transform_list = [
         PyOpenColorIO.RangeTransform(
             minInValue=0.0,
@@ -88,9 +85,18 @@ if __name__ == "__main__":
     config, colourspace = AgX.add_colourspace(
         config=config,
         family="Log Encodings",
-        name="AgX Log (Kraken)",
-        description="AgX Log, (Kraken)",
-        aliases=["Log", "AgX Log", "Kraken", "AgX Kraken Log"],
+        name="AgX Log",
+        description="AgX Log",
+        aliases=["Log"],
+        transforms=transform_list
+    )
+
+    # Reuse the transform_list
+    config, view = AgX.add_view(
+        config=config,
+        name="AgX Log View",
+        family="Log Encodings",
+        description="AgX Base Log View",
         transforms=transform_list
     )
 
@@ -115,23 +121,6 @@ if __name__ == "__main__":
         transforms=transform_list
     )
 
-    # Define a generic 2.4 Electro Optical Transfer Function
-    transform_list = [
-        PyOpenColorIO.ExponentTransform(
-            value=[2.4, 2.4, 2.4, 1.0],
-            direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Utilities/Curves",
-        name="2.4 EOTF Encoding",
-        description="2.4 Exponent EOTF Encoding",
-        aliases=["2.4 EOTF Encoding", "BT.1886 EOTF Encoding"],
-        transforms=transform_list
-    )
-
     ####
     # Displays
     ####
@@ -139,7 +128,7 @@ if __name__ == "__main__":
     # Define the specification sRGB Display colourspace
     transform_list = [
         PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
+            src="Linear BT.709 Closed Domain",
             dst="2.2 EOTF Encoding"
         )
     ]
@@ -150,326 +139,62 @@ if __name__ == "__main__":
         name="sRGB",
         description="sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display",
         transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
-    )
-
-    # TODO: Move this to a different section.
-    AgX.add_view(
-        displays, "sRGB", "Display Native", "sRGB"
-    )
-
-    # Add Display P3.
-    Display_P3_Colourspace = colour.RGB_COLOURSPACES["Display P3"]
-    sRGB_Colourspace = colour.RGB_COLOURSPACES["sRGB"]
-    D_P3_RGB_to_sRGB_matrix = colour.matrix_RGB_to_RGB(
-        sRGB_Colourspace, Display_P3_Colourspace
-    )
-
-    transform_list = [
-        PyOpenColorIO.MatrixTransform(AgX.shape_OCIO_matrix(D_P3_RGB_to_sRGB_matrix)),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="2.2 EOTF Encoding"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Displays/SDR",
-        name="Display P3",
-        description="Display P3 2.2 Exponent EOTF Display",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
-    )
-
-    # TODO: Move this to a different section.
-    AgX.add_view(
-        displays, "Display P3", "Display Native", "Display P3"
-    )
-
-    # Add BT.1886.
-    transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="2.4 EOTF Encoding"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Displays/SDR",
-        name="BT.1886",
-        description="BT.1886 2.4 Exponent EOTF Display",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
-    )
-
-    # TODO: Move this to a different section.
-    AgX.add_view(
-        displays, "BT.1886", "Display Native", "BT.1886"
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
     ####
     # Views
     ####
 
-    # Add AgX Kraken aesthetic image base.
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="AgX Log (Kraken)"
-        ),
         PyOpenColorIO.FileTransform(
             src="AgX_Default_Contrast.spi1d"
         )
     ]
 
-    config, colourspace = AgX.add_colourspace(
+    config, look = AgX.add_look(
+        config=config,
+        name="Look AgX Base",
+        description="AgX Base image appearance.",
+        processspace="AgX Log",
+        transforms=transform_list
+    )
+
+    # Add AgX Kraken aesthetic image base.
+    transform_list = [
+        PyOpenColorIO.LookTransform(
+            src="Linear BT.709",
+            dst="AgX Log",
+            looks="Look AgX Base",
+            skipColorSpaceConversion=False
+        )
+    ]
+
+    config, view = AgX.add_view(
         config=config,
         family="Imagery",
         name="AgX Base",
         description="AgX Base Image Encoding",
         transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
-    # TODO: Move this to a different section.
-    AgX.add_view(
-        displays, "sRGB", "AgX", "AgX Base"
+    # TODO: Move all of this away.
+    config.addDisplayView(
+        display="sRGB",
+        view="AgX",
+        viewTransform="AgX Base",
+        displayColorSpaceName="sRGB",
+        description="AgX Base Image Encoding for sRGB displays"
     )
 
-    # Add BT.1886 AgX Kraken aesthetic image base.
-    transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="AgX Base"
-        ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="2.4 EOTF Encoding"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Views/AgX BT.1886",
-        name="AgX Base BT.1886",
-        description="AgX Base Image Encoding for BT.1886 Displays",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
-    )
-
-    # TODO: Move this to a different section.
-    AgX.add_view(
-        displays, "BT.1886", "AgX", "AgX Base BT.1886"
-    )
-
-    # Add Display P3 AgX Kraken aesthetic image base.
-    transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="AgX Base"
-        ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="Display P3"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Views/AgX Display P3",
-        name="AgX Base Display P3",
-        description="AgX Base Image Encoding for Display P3 Displays",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
-    )
-
-    # TODO: Move this to a different section.
-    AgX.add_view(
-        displays, "Display P3", "AgX", "AgX Base Display P3"
-    )
-
-####
-# Appearances / Looks
-####
-
-    # Add a heavily tinted washed look.
-    # Golden Kraken
-    transform_list = [
-        PyOpenColorIO.CDLTransform(
-            slope=[1.0, 0.9, 0.5],
-            power=[0.8, 0.8, 0.8],
-            sat=1.3
-        )
-    ]
-
-    config, look = AgX.add_look(
-        config=config,
-        name="Golden",
-        description="A golden tinted, slightly washed look",
-        transforms=transform_list
-    )
-
-    # Add a crunchier and more saturated look.
-    # Punchy Kraken
-    transform_list = [
-        PyOpenColorIO.CDLTransform(
-            slope=[1.0, 1.0, 1.0],
-            power=[1.35, 1.35, 1.35],
-            sat=1.4
-        )
-    ]
-
-    config, colourspace = AgX.add_look(
-        config=config,
-        name="Punchy",
-        description="A punchy and more chroma laden look",
-        transforms=transform_list
-    )
-
-    # Add Golden for all displays.
-    # sRGB
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Base",
-            looks="Golden"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Appearances/Golden",
-        name="Appearance Golden sRGB",
-        description="A golden tinted, slightly washed look for sRGB displays",
-        transforms=transform_list
-    )
-
-    AgX.add_view(
-        displays, "sRGB", "Appearance Golden", "Appearance Golden sRGB"
-    )
-
-    # Display P3
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Base",
-            looks="Golden"
-        ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="Display P3"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Appearances/Golden",
-        name="Appearance Golden Display P3",
-        description="A golden tinted, slightly washed look for Display P3 displays",
-        transforms=transform_list
-    )
-
-    AgX.add_view(
-        displays, "Display P3", "Appearance Golden", "Appearance Golden Display P3"
-    )
-
-    # Display BT.1886
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Base",
-            looks="Golden"
-        ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="2.4 EOTF Encoding"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Appearances/Golden",
-        name="Appearance Golden BT.1886",
-        description="A golden tinted, slightly washed look for BT.1886 displays",
-        transforms=transform_list
-    )
-
-    AgX.add_view(
-        displays, "BT.1886", "Appearance Golden", "Appearance Golden BT.1886"
-    )
-
-    # Add Punchy for all displays.
-    # sRGB
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Base",
-            looks="Punchy"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Appearances/Punchy",
-        name="Appearance Punchy sRGB",
-        description="A punchy and more chroma laden look for sRGB displays",
-        transforms=transform_list
-    )
-
-    AgX.add_view(
-        displays, "sRGB", "Appearance Punchy", "Appearance Punchy sRGB"
-    )
-
-    # Display P3
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Base",
-            looks="Punchy"
-        ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="Display P3"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Appearances/Punchy",
-        name="Appearance Punchy Display P3",
-        description="A punchy and more chroma laden look for Display P3 displays",
-        transforms=transform_list
-    )
-
-    AgX.add_view(
-        displays, "Display P3", "Appearance Punchy", "Appearance Punchy Display P3"
-    )
-
-    # Display BT.1886
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Base",
-            looks="Punchy"
-        ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="2.4 EOTF Encoding"
-        )
-    ]
-
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Appearances/Punchy",
-        name="Appearance Punchy BT.1886",
-        description="A punchy and more chroma laden look for BT.1886 displays",
-        transforms=transform_list
-    )
-
-    AgX.add_view(
-        displays, "BT.1886", "Appearance Punchy", "Appearance Punchy BT.1886"
+    config.addDisplayView(
+        display="sRGB",
+        view="AgX",
+        viewTransform="AgX Log View",
+        displayColorSpaceName="sRGB",
+        looks="Look AgX Base",
+        description="AgX Base Image Encoding for sRGB displays"
     )
 
     ####
@@ -491,7 +216,7 @@ if __name__ == "__main__":
 
     x_input = numpy.linspace(0.0, 1.0, 4096)
     limits_contrast = [1.0, 1.0]
-    general_contrast = 3.0
+    general_contrast = 3.25
     y_LUT = AgX.equation_full_curve(
         x_input,
         AgX_x_pivot,
@@ -545,21 +270,19 @@ if __name__ == "__main__":
     all_displays = {}
     all_views = {}
 
-    print(displays.items())
-    for display, views in displays.items():
-        # all_displays.add(display)
-        for view, transform in views.items():
-            all_displays.update({display: {view: transform}})
-            print("Adding {} {} {}".format(display, view, transform))
-            config.addDisplayView(
-                display=display,
-                view=view,
-                colorSpaceName=transform
-            )
+    # print(displays.items())
+    # for display, views in displays.items():
+    #     # all_displays.add(display)
+    #     for view, transform in views.items():
+    #         all_displays.update({display: {view: transform}})
+    #         print("Adding {} {} {}".format(display, view, transform))
+    #         config.addDisplayView(
+    #             display=display,
+    #             view=view,
+    #             viewTransform=transform
+    #         )
 
     try:
-        config.validate()
-
         output_directory = pathlib.Path(output_config_directory)
         output_directory.mkdir(parents=True, exist_ok=True)
         output_file = output_directory / output_config_name
@@ -568,6 +291,7 @@ if __name__ == "__main__":
         write_file.write(config.serialize())
         write_file.close()
         print("Wrote config \"{}\"".format(output_config_name))
+        config.validate()
     except Exception as ex:
         raise ex
 
