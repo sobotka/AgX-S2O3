@@ -14,14 +14,28 @@ output_config_directory = "./config/"
 output_config_name = "config.ocio"
 output_LUTs_directory = "./LUTs/"
 LUT_search_paths = ["LUTs"]
-supported_displays = [
-    "Display P3",
-    "sRGB",
-    "BT.1886",
-    "HDR 1000"
-]
+
+supported_displays = {
+    "Display P3": {
+        "Display Native": "Display P3 Display",
+        "AgX": "AgX Display P3 Display"
+    },
+    "sRGB": {
+        "Display Native": "sRGB Display",
+        "AgX": "AgX sRGB Display"
+    },
+    "BT.1886": {
+        "Display Native": "Display P3 Display",
+        "AgX": "AgX BT.1886 Display"
+    },
+    "HDR 1000": {
+        "Display Native": "Display P3 Display",
+        "AgX": "AgX HDR 1000 Display"
+    }
+}
+
 AgX_min_EV = -10.0
-AgX_max_EV = +6.5
+AgX_max_EV = +10.0
 AgX_x_pivot = numpy.abs(AgX_min_EV / (AgX_max_EV - AgX_min_EV))
 AgX_y_pivot = 0.50
 
@@ -45,38 +59,15 @@ if __name__ == "__main__":
 
     # Define a generic tristimulus linear working space, with assumed
     # BT.709 primaries and a D65 achromatic point.
-    colourspace_family = "Colourspaces"
-    colourspace_short_name = "Linear BT.709"
-    colourspace_long_name = "Open Domain Linear BT.709 Tristimulus"
-    colourspace_aliases = ["Linear", "Linear Open Domain Colour"]
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name,
-        aliases=colourspace_aliases
-        )
-    colourspace.setDescription(
-        colourspace_long_name
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Colourspaces",
+        name="Linear BT.709",
+        description="Open Domain Linear BT.709 Tristimulus",
+        aliases=["Linear", "Linear Tristimulus"]
     )
-    # colourspace.setEncoding(    )
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
 
     # AgX
-    colourspace_family = "Colourspaces"
-    colourspace_short_name = "AgX Kraken Log"
-    colourspace_long_name = "AgX Kraken Log Encoding"
-    colourspace_aliases = ["Kraken"]
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name,
-        aliases=colourspace_aliases
-        )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
     transform_list = [
         PyOpenColorIO.RangeTransform(
             minInValue=0.0,
@@ -94,470 +85,410 @@ if __name__ == "__main__":
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Log Encodings",
+        name="AgX Log (Kraken)",
+        description="AgX Log, (Kraken)",
+        aliases=["Log", "AgX Log", "Kraken", "AgX Kraken Log"],
+        transforms=transform_list
     )
-
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
 
     ####
     # Utilities
     ####
 
     # Define a generic 2.2 Electro Optical Transfer Function
-    colourspace_family = "Utilities"
-    colourspace_short_name = "2.2 EOTF"
-    colourspace_long_name = "2.2 Exponent EOTF"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-        )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-    colourspace.setTransform(
+    transform_list = [
         PyOpenColorIO.ExponentTransform(
             value=[2.2, 2.2, 2.2, 1.0],
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE
-        ),
-        PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Utilities/Curves",
+        name="2.2 EOTF Encoding",
+        description="2.2 Exponent EOTF Encoding",
+        aliases=["2.2 EOTF Encoding", "sRGB EOTF Encoding"],
+        transforms=transform_list
     )
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
+
+    # Define a generic 2.4 Electro Optical Transfer Function
+    transform_list = [
+        PyOpenColorIO.ExponentTransform(
+            value=[2.4, 2.4, 2.4, 1.0],
+            direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Utilities/Curves",
+        name="2.4 EOTF Encoding",
+        description="2.4 Exponent EOTF Encoding",
+        aliases=["2.4 EOTF Encoding", "BT.1886 EOTF Encoding"],
+        transforms=transform_list
+    )
 
     ####
     # Displays
     ####
 
     # Define the specification sRGB Display colourspace
-    colourspace_family = "Displays/SDR"
-    colourspace_short_name = "sRGB"
-    colourspace_long_name = "sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display"
-    # colourspace_aliases = ["sRGB OETF"]
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-        # aliases=colourspace_aliases
-        )
-
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-    colourspace.setTransform(
+    transform_list = [
         PyOpenColorIO.ColorSpaceTransform(
             src="Linear BT.709",
-            dst="2.2 EOTF"
-        ),
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
+            dst="2.2 EOTF Encoding"
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Displays/SDR",
+        name="sRGB",
+        description="sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display",
+        transforms=transform_list,
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
     )
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
-    # displays[colourspace_short_name] = {}
-    # displays[colourspace_short_name]["Display Native"] = colourspace_short_name
+
+    # TODO: Move this to a different section.
     AgX.add_view(
-        displays, colourspace_short_name, "Display Native", colourspace_short_name
+        displays, "sRGB", "Display Native", "sRGB"
     )
 
     # Add Display P3.
-    colourspace_family = "Displays/SDR"
-    colourspace_short_name = "Display P3"
-    colourspace_long_name = "Display P3 2.2 Exponent Reference EOTF Display"
-
     Display_P3_Colourspace = colour.RGB_COLOURSPACES["Display P3"]
     sRGB_Colourspace = colour.RGB_COLOURSPACES["sRGB"]
     D_P3_RGB_to_sRGB_matrix = colour.matrix_RGB_to_RGB(
         sRGB_Colourspace, Display_P3_Colourspace
     )
 
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
     transform_list = [
         PyOpenColorIO.MatrixTransform(AgX.shape_OCIO_matrix(D_P3_RGB_to_sRGB_matrix)),
         PyOpenColorIO.ColorSpaceTransform(
-            src="Linear Open Domain Colour",
-            dst="2.2 EOTF"
+            src="Linear BT.709",
+            dst="2.2 EOTF Encoding"
         )
     ]
-    group_transform = PyOpenColorIO.GroupTransform(
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Displays/SDR",
+        name="Display P3",
+        description="Display P3 2.2 Exponent EOTF Display",
         transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
-    )
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
     )
 
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
-
+    # TODO: Move this to a different section.
     AgX.add_view(
-        displays, colourspace_short_name, "Display Native", colourspace_short_name
+        displays, "Display P3", "Display Native", "Display P3"
+    )
+
+    # Add BT.1886.
+    transform_list = [
+        PyOpenColorIO.ColorSpaceTransform(
+            src="Linear BT.709",
+            dst="2.4 EOTF Encoding"
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Displays/SDR",
+        name="BT.1886",
+        description="BT.1886 2.4 Exponent EOTF Display",
+        transforms=transform_list,
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
+    )
+
+    # TODO: Move this to a different section.
+    AgX.add_view(
+        displays, "BT.1886", "Display Native", "BT.1886"
     )
 
     ####
     # Views
     ####
 
-    # Add Display P3 Agx Kraken.
-    colourspace_family = "Images"
-    colourspace_short_name = "sRGB AgX"
-    colourspace_long_name = "AgX Kraken Testing"
-    aliases = ["Filmic"]
-
-    # Display_P3_Colourspace = colour.RGB_COLOURSPACES["Display P3"]
-    # sRGB_Colourspace = colour.RGB_COLOURSPACES["sRGB"]
-    # RGB_to_RGB_matrix = colour.matrix_RGB_to_RGB(
-    #     sRGB_Colourspace, Display_P3_Colourspace
-    # )
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name,
-        aliases=aliases
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
+    # Add AgX Kraken aesthetic image base.
     transform_list = [
         PyOpenColorIO.ColorSpaceTransform(
             src="Linear BT.709",
-            dst="Agx Kraken Log"
+            dst="AgX Log (Kraken)"
         ),
         PyOpenColorIO.FileTransform(
             src="AgX_Default_Contrast.spi1d"
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Imagery",
+        name="AgX Base",
+        description="AgX Base Image Encoding",
         transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
     )
 
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
-    # displays[colourspace_short_name] = {}
-    # displays[colourspace_short_name]["Display Native"] = colourspace_short_name
+    # TODO: Move this to a different section.
     AgX.add_view(
-        displays, "sRGB", "AgX", colourspace_short_name
+        displays, "sRGB", "AgX", "AgX Base"
     )
 
-    # Add Display P3 Agx Kraken.
-    colourspace_family = "Images"
-    colourspace_short_name = "Display P3 AgX"
-    colourspace_long_name = "AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
+    # Add BT.1886 AgX Kraken aesthetic image base.
     transform_list = [
         PyOpenColorIO.ColorSpaceTransform(
             src="Linear BT.709",
-            dst="sRGB AgX"
+            dst="AgX Base"
         ),
         PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF",
+            src="2.2 EOTF Encoding",
+            dst="2.4 EOTF Encoding"
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Views/AgX BT.1886",
+        name="AgX Base BT.1886",
+        description="AgX Base Image Encoding for BT.1886 Displays",
+        transforms=transform_list,
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
+    )
+
+    # TODO: Move this to a different section.
+    AgX.add_view(
+        displays, "BT.1886", "AgX", "AgX Base BT.1886"
+    )
+
+    # Add Display P3 AgX Kraken aesthetic image base.
+    transform_list = [
+        PyOpenColorIO.ColorSpaceTransform(
+            src="Linear BT.709",
+            dst="AgX Base"
+        ),
+        PyOpenColorIO.ColorSpaceTransform(
+            src="2.2 EOTF Encoding",
             dst="Display P3"
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Views/AgX Display P3",
+        name="AgX Base Display P3",
+        description="AgX Base Image Encoding for Display P3 Displays",
         transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE
     )
 
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
+    # TODO: Move this to a different section.
     AgX.add_view(
-        displays, "Display P3", "AgX", colourspace_short_name
+        displays, "Display P3", "AgX", "AgX Base Display P3"
     )
 
 ####
 # Appearances / Looks
 ####
 
-# Add a bonkers yellow boosted look.
-    colourspace_family = "Appearances"
-    colourspace_short_name = "Golden Sunshine Appearance"
-    colourspace_long_name = "Golden Sunshine AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
+    # Add a heavily tinted washed look.
+    # Golden Kraken
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="sRGB AgX"
-        ),
         PyOpenColorIO.CDLTransform(
             slope=[1.0, 0.9, 0.5],
-            power=[0.6, 0.6, 0.6],
+            power=[0.8, 0.8, 0.8],
             sat=1.3
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+    config, look = AgX.add_look(
+        config=config,
+        name="Golden",
+        description="A golden tinted, slightly washed look",
+        transforms=transform_list
     )
 
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
-
-# Add a batshit saturation boosted look.
-    colourspace_family = "Appearances"
-    colourspace_short_name = "Punchy Kraken Appearance"
-    colourspace_long_name = "Punchy AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
+    # Add a crunchier and more saturated look.
+    # Punchy Kraken
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="sRGB AgX"
-        ),
         PyOpenColorIO.CDLTransform(
             slope=[1.0, 1.0, 1.0],
             power=[1.35, 1.35, 1.35],
-            sat=1.3
+            sat=1.4
         )
     ]
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
-    )
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
 
-####
-# Set Views for the Appearances
-####
-
-    # Add Display P3 Agx Kraken Appearance.
-    colourspace_family = "Images"
-    colourspace_short_name = "Punchy Kraken Display P3"
-    colourspace_long_name = "AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
+    config, colourspace = AgX.add_look(
+        config=config,
+        name="Punchy",
+        description="A punchy and more chroma laden look",
+        transforms=transform_list
     )
 
+    # Add Golden for all displays.
+    # sRGB
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
+        PyOpenColorIO.LookTransform(
             src="Linear BT.709",
-            dst="Punchy Kraken Appearance"
+            dst="AgX Base",
+            looks="Golden"
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Appearances/Golden",
+        name="Appearance Golden sRGB",
+        description="A golden tinted, slightly washed look for sRGB displays",
+        transforms=transform_list
+    )
+
+    AgX.add_view(
+        displays, "sRGB", "Appearance Golden", "Appearance Golden sRGB"
+    )
+
+    # Display P3
+    transform_list = [
+        PyOpenColorIO.LookTransform(
+            src="Linear BT.709",
+            dst="AgX Base",
+            looks="Golden"
         ),
         PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF",
+            src="2.2 EOTF Encoding",
             dst="Display P3"
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Appearances/Golden",
+        name="Appearance Golden Display P3",
+        description="A golden tinted, slightly washed look for Display P3 displays",
+        transforms=transform_list
     )
 
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
     AgX.add_view(
-        displays, "Display P3", "Punchy Kraken", colourspace_short_name
+        displays, "Display P3", "Appearance Golden", "Appearance Golden Display P3"
     )
 
-    # Add Display P3 Agx Kraken Appearance.
-    colourspace_family = "Images"
-    colourspace_short_name = "Golden Sunshine Display P3"
-    colourspace_long_name = "AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
+    # Display BT.1886
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
+        PyOpenColorIO.LookTransform(
             src="Linear BT.709",
-            dst="Golden Sunshine Appearance"
+            dst="AgX Base",
+            looks="Golden"
         ),
         PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF",
+            src="2.2 EOTF Encoding",
+            dst="2.4 EOTF Encoding"
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Appearances/Golden",
+        name="Appearance Golden BT.1886",
+        description="A golden tinted, slightly washed look for BT.1886 displays",
+        transforms=transform_list
+    )
+
+    AgX.add_view(
+        displays, "BT.1886", "Appearance Golden", "Appearance Golden BT.1886"
+    )
+
+    # Add Punchy for all displays.
+    # sRGB
+    transform_list = [
+        PyOpenColorIO.LookTransform(
+            src="Linear BT.709",
+            dst="AgX Base",
+            looks="Punchy"
+        )
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Appearances/Punchy",
+        name="Appearance Punchy sRGB",
+        description="A punchy and more chroma laden look for sRGB displays",
+        transforms=transform_list
+    )
+
+    AgX.add_view(
+        displays, "sRGB", "Appearance Punchy", "Appearance Punchy sRGB"
+    )
+
+    # Display P3
+    transform_list = [
+        PyOpenColorIO.LookTransform(
+            src="Linear BT.709",
+            dst="AgX Base",
+            looks="Punchy"
+        ),
+        PyOpenColorIO.ColorSpaceTransform(
+            src="2.2 EOTF Encoding",
             dst="Display P3"
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Appearances/Punchy",
+        name="Appearance Punchy Display P3",
+        description="A punchy and more chroma laden look for Display P3 displays",
+        transforms=transform_list
     )
 
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
     AgX.add_view(
-        displays, "Display P3", "Fluded Sunshine", colourspace_short_name
+        displays, "Display P3", "Appearance Punchy", "Appearance Punchy Display P3"
     )
 
-# Add sRGB Agx Kraken Appearance.
-    colourspace_family = "Images"
-    colourspace_short_name = "Punchy Kraken sRGB"
-    colourspace_long_name = "AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
+    # Display BT.1886
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
+        PyOpenColorIO.LookTransform(
             src="Linear BT.709",
-            dst="Punchy Kraken Appearance"
+            dst="AgX Base",
+            looks="Punchy"
+        ),
+        PyOpenColorIO.ColorSpaceTransform(
+            src="2.2 EOTF Encoding",
+            dst="2.4 EOTF Encoding"
         )
     ]
 
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Appearances/Punchy",
+        name="Appearance Punchy BT.1886",
+        description="A punchy and more chroma laden look for BT.1886 displays",
+        transforms=transform_list
     )
 
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
     AgX.add_view(
-        displays, "sRGB", "Punchy Kraken", colourspace_short_name
-    )
-
-    # Add sRGB Agx Kraken Appearance.
-    colourspace_family = "Images"
-    colourspace_short_name = "Fluded Sunshine sRGB"
-    colourspace_long_name = "AgX Kraken Testing"
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name
-    )
-    colourspace.setDescription(
-        colourspace_long_name
-    )
-
-    transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="Golden Sunshine Appearance"
-        )
-    ]
-
-    group_transform = PyOpenColorIO.GroupTransform(
-        transforms=transform_list,
-        direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
-    )
-
-    colourspace.setTransform(
-        group_transform,
-        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE
-    )
-
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
-    AgX.add_view(
-        displays, "sRGB", "Fluded Sunshine Kraken", colourspace_short_name
+        displays, "BT.1886", "Appearance Punchy", "Appearance Punchy BT.1886"
     )
 
     ####
     # Data
     ####
 
-    colourspace_family = "Data Types"
-    colourspace_short_name = "Generic Data"
-    colourspace_long_name = "Generic Data Encoding"
-    colourspace_aliases = ["Non-Color", "Raw"]
-
-    colourspace = PyOpenColorIO.ColorSpace(
-        family=colourspace_family,
-        name=colourspace_short_name,
-        aliases=colourspace_aliases,
-        isData=True
-        )
-    colourspace.setDescription(
-        colourspace_long_name
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Data/Generic Data",
+        name="Generic Data",
+        aliases=["Non-Color", "Raw"],
+        description="Generic data encoding",
+        isdata=True
     )
-    config.addColorSpace(colourspace)
-    colourspaces.update({colourspace_short_name: colourspace})
 
     ####
-    # Creative Looks
+    # Creative Looks LUTs
     ###
+
     x_input = numpy.linspace(0.0, 1.0, 4096)
     limits_contrast = [1.0, 1.0]
     general_contrast = 3.0

@@ -1,5 +1,6 @@
 import colour
 import numpy
+import PyOpenColorIO
 
 
 def shape_OCIO_matrix(numpy_matrix):
@@ -223,3 +224,101 @@ def add_view(in_dict, display, view_name, view_transform):
     in_dict[display][view_name] = view_transform
 
     return in_dict
+
+
+def add_colourspace(
+    config,
+    family,
+    name,
+    description,
+    transforms=None,
+    aliases=[],
+    direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_FROM_REFERENCE,
+    referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE,
+    isdata=False,
+    debug=False
+):
+    colourspace_family = family
+    colourspace_name = name
+    colourspace_description = description
+
+    colourspace = PyOpenColorIO.ColorSpace(
+        referenceSpace=referencespace,
+        family=colourspace_family,
+        name=colourspace_name,
+        aliases=aliases,
+        isData=isdata
+    )
+    colourspace.setDescription(
+        colourspace_description
+    )
+
+    if transforms is not None:
+        if len(transforms) > 1:
+            transforms = PyOpenColorIO.GroupTransform(transforms)
+        else:
+            transforms = transforms[0]
+
+        colourspace.setTransform(transforms, direction)
+
+    if debug is True:
+        # DEBUG
+        shader_desc = PyOpenColorIO.GpuShaderDesc.CreateShaderDesc(
+            language=PyOpenColorIO.GPU_LANGUAGE_GLSL_4_0
+        )
+        processor = config.getProcessor(transforms).getDefaultGPUProcessor()
+        processor.extractGpuShaderInfo(shader_desc)
+        print("*****[{}]:\n{}".format(name, shader_desc.getShaderText()))
+
+    config.addColorSpace(colourspace)
+
+    return config, colourspace
+
+
+def add_named_transform(
+    config,
+    family,
+    name,
+    description,
+    transforms,
+    aliases=None
+):
+    if isinstance(transforms, list):
+        transform = PyOpenColorIO.GroupTransform(transforms)
+
+    named_transform = PyOpenColorIO.NamedTransform(
+        name=name,
+        aliases=aliases,
+        family=family,
+        forwardTransform=transform
+    )
+
+    named_transform.setDescription(description)
+
+    config.addNamedTransform(named_transform)
+
+    return config, named_transform
+
+
+def add_look(
+    config,
+    name,
+    transforms,
+    description,
+    processSpace="AgX Base",
+):
+    if len(transforms) > 1:
+        transforms = PyOpenColorIO.GroupTransform(transforms)
+    else:
+        transforms = transforms[0]
+
+    look = PyOpenColorIO.Look(
+        name=name,
+        processSpace=processSpace,
+        transform=transforms,
+        description=description
+    )
+
+    config.addLook(look)
+
+    return config, look
