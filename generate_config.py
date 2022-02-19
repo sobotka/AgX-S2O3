@@ -16,7 +16,7 @@ output_LUTs_directory = "./LUTs/"
 LUT_search_paths = ["LUTs"]
 
 AgX_min_EV = -10.0
-AgX_max_EV = +10.0
+AgX_max_EV = +6.5
 AgX_x_pivot = numpy.abs(AgX_min_EV / (AgX_max_EV - AgX_min_EV))
 AgX_y_pivot = 0.50
 
@@ -53,16 +53,16 @@ if __name__ == "__main__":
         referencespace=PyOpenColorIO.REFERENCE_SPACE_DISPLAY
     )
 
-    # transform_list = [
-    #     identity_transform
-    # ]
-    # config, view = AgX.add_view(
-    #     config=config,
-    #     name="Identity View",
-    #     family="Utilities",
-    #     description="Identity view transform",
-    #     transforms=transform_list
-    # )
+    transform_list = [
+        identity_transform
+    ]
+    config, view = AgX.add_view(
+        config=config,
+        name="Identity View",
+        family="Utilities",
+        description="Identity view transform",
+        transforms=transform_list
+    )
 
     # AgX Log
     transform_list = [
@@ -91,13 +91,25 @@ if __name__ == "__main__":
         transforms=transform_list
     )
 
+    transform_list = [
+        PyOpenColorIO.ColorSpaceTransform(
+            src="Linear BT.709",
+            dst="AgX Log"
+        ),
+        PyOpenColorIO.ColorSpaceTransform(
+            src="2.2 EOTF Encoding",
+            dst="Linear BT.709 Closed Domain"
+        )
+    ]
+
     # Reuse the transform_list
     config, view = AgX.add_view(
         config=config,
         name="AgX Log View",
         family="Log Encodings",
         description="AgX Base Log View",
-        transforms=transform_list
+        transforms=transform_list,
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
     ####
@@ -190,11 +202,12 @@ if __name__ == "__main__":
 
     config.addDisplayView(
         display="sRGB",
-        view="AgX",
-        viewTransform="AgX Log View",
-        displayColorSpaceName="sRGB",
+        view="sRGB",
+        # viewTransform="AgX Log View",
+        # displayColorSpaceName="sRGB",
+        colorSpaceName="sRGB",
         looks="Look AgX Base",
-        description="AgX Base Image Encoding for sRGB displays"
+        # description="AgX Base Image Encoding for sRGB displays"
     )
 
     ####
