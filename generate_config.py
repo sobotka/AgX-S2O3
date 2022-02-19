@@ -490,8 +490,8 @@ if __name__ == "__main__":
     ###
 
     x_input = numpy.linspace(0.0, 1.0, 4096)
-    limits_contrast = [1.0, 1.0]
-    general_contrast = 3.0
+    limits_contrast = [3.0, 3.25]
+    general_contrast = 2.0
     y_LUT = AgX.equation_full_curve(
         x_input,
         AgX_x_pivot,
