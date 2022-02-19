@@ -18,7 +18,7 @@ LUT_search_paths = ["LUTs"]
 AgX_min_EV = -10.0
 AgX_max_EV = +6.5
 AgX_x_pivot = numpy.abs(AgX_min_EV / (AgX_max_EV - AgX_min_EV))
-AgX_y_pivot = 0.50
+AgX_y_pivot = 0.5
 
 if __name__ == "__main__":
     config = PyOpenColorIO.Config()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         family="Colourspaces",
         name="Linear BT.709 Closed Domain",
         description="Closed Domain Linear BT.709 Tristimulus",
-        aliases=["Linear Closed Domain", "Linear Tristimulus Closed Domain"],
+        aliases=["Linear Closed", "Linear Closed Tristimulus", "Linear Closed Domain"],
         referencespace=PyOpenColorIO.REFERENCE_SPACE_DISPLAY
     )
 
@@ -59,9 +59,24 @@ if __name__ == "__main__":
     config, view = AgX.add_view(
         config=config,
         name="Identity View",
-        family="Utilities",
-        description="Identity view transform",
+        family="Views",
+        description="Identity view transform bridge",
         transforms=transform_list
+    )
+
+    transform_list = [
+        PyOpenColorIO.ExponentTransform(
+            value=[2.2, 2.2, 2.2, 1.0],
+            direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE
+        )
+    ]
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Colourspaces",
+        name="sRGB",
+        description="BT.709 Encoded",
+        transforms=transform_list,
+        referencespace=PyOpenColorIO.REFERENCE_SPACE_DISPLAY
     )
 
     # AgX Log
@@ -85,8 +100,8 @@ if __name__ == "__main__":
     config, colourspace = AgX.add_colourspace(
         config=config,
         family="Log Encodings",
-        name="AgX Log",
-        description="AgX Log",
+        name="Log",
+        description="Log",
         aliases=["Log"],
         transforms=transform_list
     )
@@ -94,22 +109,36 @@ if __name__ == "__main__":
     transform_list = [
         PyOpenColorIO.ColorSpaceTransform(
             src="Linear BT.709",
-            dst="AgX Log"
+            dst="Log"
         ),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="2.2 EOTF Encoding",
-            dst="Linear BT.709 Closed Domain"
+        PyOpenColorIO.ExponentTransform(
+            value=[2.2, 2.2, 2.2, 1.0],
+            direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
         )
     ]
 
-    # Reuse the transform_list
-    config, view = AgX.add_view(
+    config, colourspace = AgX.add_colourspace(
         config=config,
-        name="AgX Log View",
-        family="Log Encodings",
-        description="AgX Base Log View",
+        family="Imagery",
+        name="Image Log",
+        description="Reference image",
         transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+        referencespace=PyOpenColorIO.REFERENCE_SPACE_DISPLAY
+    )
+
+    transform_list = [
+        PyOpenColorIO.ColorSpaceTransform(
+            src="Linear BT.709",
+            dst="Image Log"
+        )
+    ]
+
+    config, colourspace = AgX.add_view(
+        config=config,
+        family="Imagery",
+        name="Image Log View",
+        description="Reference image",
+        transforms=transform_list
     )
 
     ####
@@ -124,12 +153,11 @@ if __name__ == "__main__":
         )
     ]
 
-    config, colourspace = AgX.add_colourspace(
+    config, colourspace = AgX.add_view(
         config=config,
-        family="Utilities/Curves",
+        family="Views/Curves",
         name="2.2 EOTF Encoding",
-        description="2.2 Exponent EOTF Encoding",
-        aliases=["2.2 EOTF Encoding", "sRGB EOTF Encoding"],
+        description="2.2 Exponent EOTF Encoding View",
         transforms=transform_list
     )
 
@@ -138,81 +166,119 @@ if __name__ == "__main__":
     ####
 
     # Define the specification sRGB Display colourspace
-    transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709 Closed Domain",
-            dst="2.2 EOTF Encoding"
-        )
-    ]
+    # transform_list = [
+    #     PyOpenColorIO.ColorSpaceTransform(
+    #         src="Linear Closed Domain",
+    #         dst="2.2 EOTF Encoding"
+    #     )
+    # ]
 
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Displays/SDR",
-        name="sRGB",
-        description="sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
-    )
+    # config, colourspace = AgX.add_colourspace(
+    #     config=config,
+    #     family="Displays/SDR",
+    #     name="sRGB",
+    #     description="sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display",
+    #     transforms=transform_list,
+    #     referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    # )
 
+    # config, view = AgX.add_view(
+    #     config=config,
+    #     family="Utilities",
+    #     name="EOTF 2.2 Encoding View",
+    #     description="EOTF 2.2 Encoding View",
+    #     transforms=transform_list,
+    #     referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    # )
     ####
     # Views
     ####
 
+    # Add AgX Kraken aesthetic image base.
+    # transform_list = [
+    #     PyOpenColorIO.ColorSpaceTransform(
+    #         src="Linear Open Domain",
+    #         dst="AgX Log"
+    #     ),
+    #     PyOpenColorIO.ExponentTransform(
+    #         value=[2.2, 2.2, 2.2, 1.0],
+    #         direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
+    #     )
+    # ]
+
+    # config, view = AgX.add_view(
+    #     config=config,
+    #     family="Imagery",
+    #     name="AgX Log View",
+    #     description="AgX Base Image Encoding",
+    #     transforms=transform_list,
+    #     referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    # )
+
     transform_list = [
+        PyOpenColorIO.ColorSpaceTransform(
+            src="Linear BT.709",
+            dst="Image Log"
+        ),
+        PyOpenColorIO.ExponentTransform(
+            value=[2.2, 2.2, 2.2, 1.0],
+            direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE
+        ),
         PyOpenColorIO.FileTransform(
             src="AgX_Default_Contrast.spi1d"
+        ),
+        PyOpenColorIO.ExponentTransform(
+            value=[2.2, 2.2, 2.2, 1.0],
+            direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD
         )
     ]
 
     config, look = AgX.add_look(
         config=config,
-        name="Look AgX Base",
-        description="AgX Base image appearance.",
-        processspace="AgX Log",
+        name="Look Base",
+        description="Base image look.",
+        processspace="Linear BT.709 Closed Domain",
         transforms=transform_list
     )
 
-    # Add AgX Kraken aesthetic image base.
-    transform_list = [
-        PyOpenColorIO.LookTransform(
-            src="Linear BT.709",
-            dst="AgX Log",
-            looks="Look AgX Base",
-            skipColorSpaceConversion=False
-        )
-    ]
-
-    config, view = AgX.add_view(
-        config=config,
-        family="Imagery",
-        name="AgX Base",
-        description="AgX Base Image Encoding",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
-    )
-
-    # TODO: Move all of this away.
+    # # TODO: Move all of this away.
     config.addDisplayView(
         display="sRGB",
-        view="AgX",
-        viewTransform="AgX Base",
+        view="Display Native",
+        viewTransform="2.2 EOTF Encoding",
+        displayColorSpaceName="Linear BT.709 Closed Domain",
+        description="sRGB Encoding"
+    )
+
+    config.addDisplayView(
+        display="sRGB",
+        view="Image",
+        viewTransform="Image Log View",
         displayColorSpaceName="sRGB",
-        description="AgX Base Image Encoding for sRGB displays"
+        description="Default image view"
     )
 
     config.addDisplayView(
         display="sRGB",
-        view="sRGB",
-        # viewTransform="AgX Log View",
-        # displayColorSpaceName="sRGB",
-        colorSpaceName="sRGB",
-        looks="Look AgX Base",
-        # description="AgX Base Image Encoding for sRGB displays"
+        view="Image Look",
+        viewTransform="Identity View",
+        displayColorSpaceName="sRGB",
+        looks="Look Base",
+        description="Default image view"
     )
 
-    ####
-    # Data
-    ####
+    # config.addDisplayView(
+    #     display="sRGB",
+    #     view="AgX",
+    #     viewTransform="AgX Log View",
+    #     displayColorSpaceName="sRGB",
+    #     looks="Look AgX Base",
+    #     description="AgX Base Image Encoding for sRGB displays"
+    # )
+
+    # ####
+    # # Data
+    # ####
 
     config, colourspace = AgX.add_colourspace(
         config=config,
@@ -228,8 +294,8 @@ if __name__ == "__main__":
     ###
 
     x_input = numpy.linspace(0.0, 1.0, 4096)
-    limits_contrast = [1.0, 1.0]
-    general_contrast = 3.25
+    limits_contrast = [3.0, 3.25]
+    general_contrast = 2.0
     y_LUT = AgX.equation_full_curve(
         x_input,
         AgX_x_pivot,
@@ -283,18 +349,6 @@ if __name__ == "__main__":
     all_displays = {}
     all_views = {}
 
-    # print(displays.items())
-    # for display, views in displays.items():
-    #     # all_displays.add(display)
-    #     for view, transform in views.items():
-    #         all_displays.update({display: {view: transform}})
-    #         print("Adding {} {} {}".format(display, view, transform))
-    #         config.addDisplayView(
-    #             display=display,
-    #             view=view,
-    #             viewTransform=transform
-    #         )
-
     try:
         output_directory = pathlib.Path(output_config_directory)
         output_directory.mkdir(parents=True, exist_ok=True)
@@ -307,270 +361,3 @@ if __name__ == "__main__":
         config.validate()
     except Exception as ex:
         raise ex
-
-    # print(config)
-#     in_xy_D65 = models.sRGB_COLOURSPACE.whitepoint
-
-#     sRGB_IE = colour.RGB_Colourspace(
-#         "sRGB IE",
-#         models.sRGB_COLOURSPACE.primaries,
-#         [1./3., 1./3.],
-#         whitepoint_name="Illuminant E",
-#         cctf_decoding=models.sRGB_COLOURSPACE.cctf_decoding,
-#         cctf_encoding=models.sRGB_COLOURSPACE.cctf_encoding,
-#         use_derived_RGB_to_XYZ_matrix=True,
-#         use_derived_XYZ_to_RGB_matrix=True)
-
-#     ocioshape_IE_to_D65 = shape_OCIO_matrix(sRGB_IE.RGB_to_XYZ_matrix)
-#     ociotransform_IE_to_D65 =\
-#         PyOpenColorIO.MatrixTransform(ocioshape_IE_to_D65)
-
-#     sRGB_domain = numpy.array([0.0, 1.0])
-#     sRGB_tf_to_linear_LUT = colour.LUT1D(
-#         table=models.sRGB_COLOURSPACE.cctf_decoding(
-#             colour.LUT1D.linear_table(
-#                 1024, sRGB_domain)),
-#         name="sRGB to Linear",
-#         domain=sRGB_domain,
-#         comments=["sRGB CCTF to Display Linear"])
-#     sRGB_linear_to_tf_LUT = colour.LUT1D(
-#         table=models.sRGB_COLOURSPACE.cctf_encoding(
-#             colour.LUT1D.linear_table(
-#                 8192, sRGB_domain)),
-#         name="Linear to sRGB",
-#         domain=sRGB_domain,
-#         comments=["sRGB Display Linear to CCTF"])
-
-#     sRGB_D65_to_IE_RGB_to_RGB_matrix = colour.RGB_to_RGB_matrix(
-#         models.sRGB_COLOURSPACE,
-#         sRGB_IE)
-
-#     io.write_LUT(
-#         LUT=sRGB_tf_to_linear_LUT,
-#         path=path_prefix_luts + "sRGB_CCTF_to_Linear.spi1d",
-#         decimals=10)
-#     io.write_LUT(
-#         LUT=sRGB_linear_to_tf_LUT,
-#         path=path_prefix_luts + "sRGB_Linear_to_CCTF.spi1d",
-#         decimals=10)
-
-#     config = PyOpenColorIO.Config()
-
-#     config.setSearchPath(":".join(LUT_search_paths))
-
-#     # Define the radiometrically linear working reference space
-#     colourspace = PyOpenColorIO.ColorSpace(
-#         family="Colourspace",
-#         name="Scene Linear BT.709 IE")
-#     colourspace.setDescription("Scene Linear BT.709 with IE white point")
-#     colourspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-#     colourspace.setAllocationVars(
-#         [
-#             numpy.log2(calculate_ev_to_rl(-10.0)),
-#             numpy.log2(calculate_ev_to_rl(15.0))
-#         ])
-#     colourspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
-#     config.addColorSpace(colourspace)
-
-#     # Define the sRGB specification
-#     colourspace = PyOpenColorIO.ColorSpace(
-#         family="Colourspace",
-#         name="sRGB Colourspace")
-#     colourspace.setDescription("sRGB IEC 61966-2-1 Colourspace")
-#     colourspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-#     colourspace.setAllocationVars([0.0, 1.0])
-#     colourspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_UNIFORM)
-#     transform_to = PyOpenColorIO.GroupTransform()
-#     transform_to.push_back(
-#         PyOpenColorIO.FileTransform(
-#             "sRGB_CCTF_to_Linear.spi1d",
-#             interpolation=PyOpenColorIO.Constants.INTERP_NEAREST))
-
-#     ocio_sRGB_D65_to_sRGB_IE_matrix = shape_OCIO_matrix(
-#         sRGB_D65_to_IE_RGB_to_RGB_matrix)
-#     transform_sRGB_D65_to_sRGB_IE =\
-#         PyOpenColorIO.MatrixTransform(ocio_sRGB_D65_to_sRGB_IE_matrix)
-#     transform_to.push_back(transform_sRGB_D65_to_sRGB_IE)
-#     transform_from = PyOpenColorIO.GroupTransform()
-
-#     # The first object is the wrong direction re-used from above.
-#     transform_sRGB_IE_to_sRGB_D65 =\
-#         PyOpenColorIO.MatrixTransform(ocio_sRGB_D65_to_sRGB_IE_matrix)
-
-#     # Flip the direction to get the proper output
-#     transform_sRGB_IE_to_sRGB_D65.setDirection(
-#         PyOpenColorIO.Constants.TRANSFORM_DIR_INVERSE)
-#     transform_from.push_back(transform_sRGB_IE_to_sRGB_D65)
-#     transform_from.push_back(
-#         PyOpenColorIO.FileTransform(
-#             "sRGB_Linear_to_CCTF.spi1d",
-#             interpolation=PyOpenColorIO.Constants.INTERP_NEAREST))
-
-#     colourspace.setTransform(
-#         transform_to, PyOpenColorIO.Constants.COLORSPACE_DIR_TO_REFERENCE)
-#     colourspace.setTransform(
-#         transform_from, PyOpenColorIO.Constants.COLORSPACE_DIR_FROM_REFERENCE)
-
-#     config.addColorSpace(colourspace)
-
-#     # Define the commodity sRGB transform
-#     colourspace = PyOpenColorIO.ColorSpace(
-#         family="Colourspace",
-#         name="BT.709 2.2 CCTF Colourspace")
-#     colourspace.setDescription("Commodity BT.709 2.2 CCTF Colourspace")
-#     colourspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-#     colourspace.setAllocationVars([0.0, 1.0])
-#     colourspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_UNIFORM)
-#     transform_to = PyOpenColorIO.GroupTransform()
-#     transform_to.push_back(
-#         PyOpenColorIO.ExponentTransform([2.2, 2.2, 2.2, 1.0]))
-
-#     transform_to.push_back(transform_sRGB_D65_to_sRGB_IE)
-#     transform_from = PyOpenColorIO.GroupTransform()
-
-#     transform_from.push_back(transform_sRGB_IE_to_sRGB_D65)
-#     exponent_transform = PyOpenColorIO.ExponentTransform([2.2, 2.2, 2.2, 1.0])
-#     exponent_transform.setDirection(
-#         PyOpenColorIO.Constants.TRANSFORM_DIR_INVERSE)
-#     transform_from.push_back(exponent_transform)
-
-#     colourspace.setTransform(
-#         transform_to, PyOpenColorIO.Constants.COLORSPACE_DIR_TO_REFERENCE)
-#     colourspace.setTransform(
-#         transform_from, PyOpenColorIO.Constants.COLORSPACE_DIR_FROM_REFERENCE)
-
-#     config.addColorSpace(colourspace)
-
-#     # Define the reference ITU-R BT.709 linear RGB to IE based
-#     # reference transform
-#     colourspace = PyOpenColorIO.ColorSpace(
-#         family="Chromaticity",
-#         name="sRGB Linear RGB")
-#     colourspace.setDescription("sRGB IEC 61966-2-1 Linear RGB")
-#     colourspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-#     colourspace.setAllocationVars(
-#         [
-#             numpy.log2(calculate_ev_to_rl(-10.0)),
-#             numpy.log2(calculate_ev_to_rl(15.0))
-#         ])
-#     colourspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
-
-#     transform_to = transform_sRGB_D65_to_sRGB_IE
-#     transform_from = transform_sRGB_IE_to_sRGB_D65
-
-#     colourspace.setTransform(
-#         transform_to, PyOpenColorIO.Constants.COLORSPACE_DIR_TO_REFERENCE)
-#     colourspace.setTransform(
-#         transform_from, PyOpenColorIO.Constants.COLORSPACE_DIR_FROM_REFERENCE)
-
-#     config.addColorSpace(colourspace)
-
-#     # Define the reference ITU-R BT.709 Illuminant E white point basd
-#     # reference space to linear XYZ transform
-#     colourspace = PyOpenColorIO.ColorSpace(
-#         family="Chromaticity",
-#         name="XYZ IE")
-#     colourspace.setDescription("XYZ transform with Illuminant E white point")
-#     colourspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-#     colourspace.setAllocationVars(
-#         [
-#             numpy.log2(calculate_ev_to_rl(-10.0)),
-#             numpy.log2(calculate_ev_to_rl(15.0))
-#         ])
-#     colourspace.setAllocation(PyOpenColorIO.Constants.ALLOCATION_LG2)
-
-#     ocio_sRGB_IE_to_XYZ_IE_matrix = shape_OCIO_matrix(
-#         sRGB_IE.RGB_to_XYZ_matrix
-#     )
-#     transform_sRGB_IE_to_XYZ_IE =\
-#         PyOpenColorIO.MatrixTransform(ocio_sRGB_IE_to_XYZ_IE_matrix)
-
-#     transform_to = transform_sRGB_IE_to_XYZ_IE
-
-#     # Initialize with the matrix the wrong direction
-#     transform_from =\
-#         PyOpenColorIO.MatrixTransform(ocio_sRGB_IE_to_XYZ_IE_matrix)
-#     # Set the proper direction
-#     transform_from.setDirection(PyOpenColorIO.Constants.TRANSFORM_DIR_INVERSE)
-
-#     colourspace.setTransform(
-#         transform_to, PyOpenColorIO.Constants.COLORSPACE_DIR_TO_REFERENCE)
-#     colourspace.setTransform(
-#         transform_from, PyOpenColorIO.Constants.COLORSPACE_DIR_FROM_REFERENCE)
-
-#     config.addColorSpace(colourspace)
-
-#     # Define the Non-Colour Data transform
-#     colorspace = PyOpenColorIO.ColorSpace(
-#         family="Data",
-#         name="Float Data")
-#     colorspace.setDescription("Float data that does not define a colour")
-#     colorspace.setBitDepth(PyOpenColorIO.Constants.BIT_DEPTH_F32)
-#     colorspace.setIsData(True)
-#     config.addColorSpace(colorspace)
-
-#     # Define the luminance coefficients for the configuration
-#     config.setDefaultLumaCoefs(sRGB_IE.RGB_to_XYZ_matrix[1])
-
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_SCENE_LINEAR,
-#         "Scene Linear BT.709 IE")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_REFERENCE,
-#         "Scene Linear BT.709 IE")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_COLOR_TIMING,
-#         "sRGB Colourspace")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_COMPOSITING_LOG,
-#         "sRGB Colourspace")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_COLOR_PICKING,
-#         "sRGB Colourspace")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_DATA,
-#         "Float Data")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_DEFAULT,
-#         "sRGB Colourspace")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_MATTE_PAINT,
-#         "sRGB Colourspace")
-#     config.setRole(
-#         PyOpenColorIO.Constants.ROLE_TEXTURE_PAINT,
-#         "sRGB Colourspace")
-
-#     # Define the Blender Role RGB to XYZ
-#     config.setRole(
-#         "XYZ",
-#         "XYZ IE")
-
-#     displays = {
-#         "sRGB-Like Commodity Display": {
-#             "Display Native": "BT.709 2.2 CCTF Colourspace"
-#         },
-#         "sRGB Display": {
-#             "Display Native": "sRGB Colourspace"
-#         }
-#     }
-
-#     all_displays = set()
-#     all_views = set()
-
-#     for display, views in displays.items():
-#         all_displays.add(display)
-#         for view, transform in views.items():
-#             all_views.add(view)
-#             config.addDisplay(display, view, transform)
-
-#     config.setActiveDisplays(", ".join(all_displays))
-#     config.setActiveViews(", ".join(all_views))
-
-#     try:
-#         config.sanityCheck()
-#         write_file = open(output_config_name, "w")
-#         write_file.write(config.serialize())
-#         write_file.close()
-#         print("Wrote config \"{}\"".format(output_config_name))
-#     except Exception as ex:
-#         raise ex
