@@ -218,12 +218,49 @@ def equation_full_curve(x, x_pivot, y_pivot, slope_pivot, power):
     return equation_curve(x, x_pivot, y_pivot, slope_pivot, power, scale)
 
 
-def add_view(in_dict, display, view_name, view_transform):
+def append_view(in_dict, display, view_name, view_transform):
     if display not in in_dict:
         in_dict[display] = {}
     in_dict[display][view_name] = view_transform
 
     return in_dict
+
+
+def add_view(
+    config,
+    family,
+    name,
+    description,
+    transforms=None,
+    referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_SCENE,
+    debug=False
+):
+    if transforms is not None:
+        if len(transforms) > 1:
+            transforms = PyOpenColorIO.GroupTransform(transforms)
+        else:
+            transforms = transforms[0]
+
+    view = PyOpenColorIO.ViewTransform(
+        referenceSpace=referencespace,
+        family=family,
+        name=name,
+        description=description,
+        fromReference=transforms
+    )
+
+    if debug is True:
+        # DEBUG
+        shader_desc = PyOpenColorIO.GpuShaderDesc.CreateShaderDesc(
+            language=PyOpenColorIO.GPU_LANGUAGE_GLSL_4_0
+        )
+        processor = config.getProcessor(transforms).getDefaultGPUProcessor()
+        processor.extractGpuShaderInfo(shader_desc)
+        print("*****[{}]:\n{}".format(name, shader_desc.getShaderText()))
+
+    config.addViewTransform(view)
+
+    return config, view
 
 
 def add_colourspace(
