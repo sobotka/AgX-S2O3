@@ -35,7 +35,7 @@ supported_displays = {
 }
 
 AgX_min_EV = -10.0
-AgX_max_EV = +10.0
+AgX_max_EV = +6.5
 AgX_x_pivot = numpy.abs(AgX_min_EV / (AgX_max_EV - AgX_min_EV))
 AgX_y_pivot = 0.50
 
