@@ -42,10 +42,51 @@ if __name__ == "__main__":
     # BT.709 primaries and a D65 achromatic point.
     config, colourspace = AgX.add_colourspace(
         config=config,
-        family="Colourspaces",
+        family="Colourimetry",
         name="Linear BT.709",
         description="Open Domain Linear BT.709 Tristimulus",
         aliases=["Linear", "Linear Tristimulus"]
+    )
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Colourimetry",
+        name="Linear BT.709 Closed Domain",
+        description="Closed Domain Linear BT.709 Tristimulus",
+        aliases=["Linear Closed Domain", "Linear Closed Domain Tristimulus"],
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    )
+
+    # Display P3 Colourimetry
+    Display_P3_Colourspace = colour.RGB_COLOURSPACES["Display P3"]
+    sRGB_Colourspace = colour.RGB_COLOURSPACES["sRGB"]
+    D_P3_RGB_to_sRGB_matrix = colour.matrix_RGB_to_RGB(
+        sRGB_Colourspace, Display_P3_Colourspace
+    )
+
+    transform_list = [
+        PyOpenColorIO.MatrixTransform(AgX.shape_OCIO_matrix(D_P3_RGB_to_sRGB_matrix))
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Colourimetry",
+        name="Linear Display P3",
+        description="Open Domain Linear Display P3 Tristimulus",
+        aliases=["Linear Display P3", "Linear Display P3 Tristimulus"],
+        transforms=transform_list
+    )
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Colourimetry",
+        name="Linear Display P3",
+        description="Closed Domain Linear Display P3 Tristimulus",
+        aliases=[
+            "Linear Closed Domain Display P3",
+            "Linear Closed Domain Display P3 Tristimulus"
+        ],
+        transforms=transform_list
     )
 
     # Define the core AgX Log based encoding.
@@ -114,7 +155,7 @@ if __name__ == "__main__":
     )
 
     ####
-    # Displays
+    # Displays and Technical Transforms
     ####
 
     # Define the specification sRGB Display colourspace
@@ -135,46 +176,46 @@ if __name__ == "__main__":
         referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
-    # Display - Display P3.
-    Display_P3_Colourspace = colour.RGB_COLOURSPACES["Display P3"]
-    sRGB_Colourspace = colour.RGB_COLOURSPACES["sRGB"]
-    D_P3_RGB_to_sRGB_matrix = colour.matrix_RGB_to_RGB(
-        sRGB_Colourspace, Display_P3_Colourspace
-    )
+    # # Display - Display P3.
+    # Display_P3_Colourspace = colour.RGB_COLOURSPACES["Display P3"]
+    # sRGB_Colourspace = colour.RGB_COLOURSPACES["sRGB"]
+    # D_P3_RGB_to_sRGB_matrix = colour.matrix_RGB_to_RGB(
+    #     sRGB_Colourspace, Display_P3_Colourspace
+    # )
 
-    transform_list = [
-        PyOpenColorIO.MatrixTransform(AgX.shape_OCIO_matrix(D_P3_RGB_to_sRGB_matrix)),
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="2.2 EOTF Encoding"
-        )
-    ]
+    # transform_list = [
+    #     PyOpenColorIO.MatrixTransform(AgX.shape_OCIO_matrix(D_P3_RGB_to_sRGB_matrix)),
+    #     PyOpenColorIO.ColorSpaceTransform(
+    #         src="Linear BT.709",
+    #         dst="2.2 EOTF Encoding"
+    #     )
+    # ]
 
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Displays/SDR",
-        name="Display - Display P3",
-        description="Display P3 2.2 Exponent EOTF Display",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
-    )
+    # config, colourspace = AgX.add_colourspace(
+    #     config=config,
+    #     family="Displays/SDR",
+    #     name="Display - Display P3",
+    #     description="Display P3 2.2 Exponent EOTF Display",
+    #     transforms=transform_list,
+    #     referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    # )
 
-    # Display - BT.1886.
-    transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="2.4 EOTF Encoding"
-        )
-    ]
+    # # Display - BT.1886.
+    # transform_list = [
+    #     PyOpenColorIO.ColorSpaceTransform(
+    #         src="Linear BT.709",
+    #         dst="2.4 EOTF Encoding"
+    #     )
+    # ]
 
-    config, colourspace = AgX.add_colourspace(
-        config=config,
-        family="Displays/SDR",
-        name="Display - BT.1886",
-        description="BT.1886 2.4 Exponent EOTF Display",
-        transforms=transform_list,
-        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
-    )
+    # config, colourspace = AgX.add_colourspace(
+    #     config=config,
+    #     family="Displays/SDR",
+    #     name="Display - BT.1886",
+    #     description="BT.1886 2.4 Exponent EOTF Display",
+    #     transforms=transform_list,
+    #     referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    # )
 
     ####
     # Imagery
@@ -193,6 +234,7 @@ if __name__ == "__main__":
         family="Imagery",
         name="Image - sRGB",
         description="sRGB IEC 61966-2-1 2.2 Reference Image Encoding",
+        aliases=["sRGB"],
         transforms=transform_list,
         referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
@@ -201,10 +243,6 @@ if __name__ == "__main__":
     # We need a basis for the core image, so we will define the base log
     # relative to a flat linear image encoding.
     transform_list = [
-        PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
-            dst="AgX Log"
-        ),
         PyOpenColorIO.ExponentTransform(
             value=[
                 AgX_image_linear_exponent,
@@ -212,6 +250,10 @@ if __name__ == "__main__":
                 AgX_image_linear_exponent,
                 1.0
             ]
+        ),
+        PyOpenColorIO.ColorSpaceTransform(
+            src="AgX Log",
+            dst="Linear BT.709 Closed Domain"
         )
     ]
 
@@ -221,6 +263,7 @@ if __name__ == "__main__":
         name="Image - AgX Flat",
         description="Flat AgX image",
         transforms=transform_list,
+        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_TO_REFERENCE,
         referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
@@ -238,16 +281,16 @@ if __name__ == "__main__":
     config, view = AgX.add_view(
         config=config,
         family="Views",
-        name="Linear BT.709 Closed Domain",
-        description="Linear BT.709 Closed Domain",
+        name="Identity View",
+        description="No operation identity view",
         transforms=transform_list,
         referencespace=PyOpenColorIO.REFERENCE_SPACE_SCENE
     )
-    inactive_colourspaces.append("Linear BT.709 Closed Domain")
+    inactive_colourspaces.append("Identity View")
 
     transform_list = [
         PyOpenColorIO.ColorSpaceTransform(
-            src="Linear BT.709",
+            src="Linear BT.709 Closed Domain",
             dst="2.2 EOTF Encoding"
         )
     ]
@@ -268,8 +311,8 @@ if __name__ == "__main__":
     config.addDisplayView(
         display="sRGB",
         view="Display Encoding",
-        viewTransform="Linear BT.709 Closed Domain",
-        displayColorSpaceName="Display - sRGB",
+        viewTransform="2.2 EOTF Encoding",
+        displayColorSpaceName="Linear BT.709 Closed Domain",
         description="sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display"
     )
     # # Add AgX Kraken aesthetic image base.

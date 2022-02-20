@@ -275,19 +275,14 @@ def add_colourspace(
     isdata=False,
     debug=False
 ):
-    colourspace_family = family
-    colourspace_name = name
-    colourspace_description = description
 
     colourspace = PyOpenColorIO.ColorSpace(
         referenceSpace=referencespace,
-        family=colourspace_family,
-        name=colourspace_name,
+        family=family,
+        name=name,
         aliases=aliases,
+        description=description,
         isData=isdata
-    )
-    colourspace.setDescription(
-        colourspace_description
     )
 
     if transforms is not None:
