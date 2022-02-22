@@ -80,13 +80,14 @@ if __name__ == "__main__":
     config, colourspace = AgX.add_colourspace(
         config=config,
         family="Colourimetry",
-        name="Linear Display P3",
+        name="Linear Display P3 Closed Domain",
         description="Closed Domain Linear Display P3 Tristimulus",
         aliases=[
             "Linear Closed Domain Display P3",
             "Linear Closed Domain Display P3 Tristimulus"
         ],
-        transforms=transform_list
+        transforms=transform_list,
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
     # Define the core AgX Log based encoding.
@@ -310,10 +311,18 @@ if __name__ == "__main__":
 
     config.addDisplayView(
         display="sRGB",
-        view="Display Encoding",
+        view="Inverse EOTF Encoding",
         viewTransform="2.2 EOTF Encoding",
         displayColorSpaceName="Linear BT.709 Closed Domain",
         description="sRGB IEC 61966-2-1 2.2 Exponent Reference EOTF Display"
+    )
+
+    config.addDisplayView(
+        display="Display P3",
+        view="Inverse EOTF Encoding",
+        viewTransform="2.2 EOTF Encoding",
+        displayColorSpaceName="Linear Display P3 Closed Domain",
+        description="Display P3 2.2 Exponent EOTF Display"
     )
     # # Add AgX Kraken aesthetic image base.
     # transform_list = [
