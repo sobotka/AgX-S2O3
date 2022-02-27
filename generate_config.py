@@ -268,6 +268,20 @@ if __name__ == "__main__":
         referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
     )
 
+    transform_list = [
+        PyOpenColorIO.BuiltinTransform("IDENTITY")
+    ]
+
+    config, colourspace = AgX.add_colourspace(
+        config=config,
+        family="Utilities",
+        name="Identity No Operation",
+        description="Identity transform that results in no operation",
+        transforms=transform_list,
+        direction=PyOpenColorIO.ColorSpaceDirection.COLORSPACE_DIR_TO_REFERENCE,
+        referencespace=PyOpenColorIO.ReferenceSpaceType.REFERENCE_SPACE_DISPLAY
+    )
+
     ####
     # Views
     ####
@@ -306,6 +320,24 @@ if __name__ == "__main__":
     )
 
     ####
+    # Looks
+    ####
+
+    transform_list = [
+        PyOpenColorIO.ColorSpaceTransform(
+            src="Linear BT.709",
+            dst="Image - AgX Flat"
+        )
+    ]
+
+    config, colourspace = AgX.add_look(
+        config=config,
+        name="Flat Image",
+        description="A flattened contrast image",
+        transforms=transform_list
+    )
+
+    ####
     # Display Views
     ####
 
@@ -324,6 +356,16 @@ if __name__ == "__main__":
         displayColorSpaceName="Linear Display P3 Closed Domain",
         description="Display P3 2.2 Exponent EOTF Display"
     )
+
+    config.addDisplayView(
+        display="Display P3",
+        view="Flat Image",
+        viewTransform="2.2 EOTF Encoding",
+        displayColorSpaceName="Linear Display P3 Closed Domain",
+        looks="Flat Image",
+        description="Display P3 2.2 Exponent EOTF Display"
+    )
+
     # # Add AgX Kraken aesthetic image base.
     # transform_list = [
     #     PyOpenColorIO.ColorSpaceTransform(

@@ -337,7 +337,7 @@ def add_look(
     name,
     transforms,
     description,
-    processSpace="AgX Base",
+    processSpace="Identity No Operation",
 ):
     if len(transforms) > 1:
         transforms = PyOpenColorIO.GroupTransform(transforms)
