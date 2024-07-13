@@ -114,7 +114,7 @@ The first big quesiton arose when I realized that the pictorial depiction of two
 space opera characters had something that was cognitively dissonant. The
 canonical lightsaber. Here, in a cultural trope, was a cognitive minefield.
 
-![Darth vs Luke](/README%20Assets/Darth%20vs%20Luke%20-%20Base.png?raw=true "Darth vs Luke")
+![Darth vs Luke](/README_Assets/Darth_vs_Luke_-_Base.png?raw=true "Darth vs Luke")
 
 Specifically, it struck me that in no other case, beyond incredibly sustained
 fixation, would any experience "lose colour". So why did this chemical creative
@@ -134,7 +134,7 @@ Ready?
 Here's a sampling of stimuli, pulled out into an increment and decrement series of
 stimuli swatches.
 
-![Darth vs Luke](/README%20Assets/Darth%20vs%20Luke%20-%20Stimuli%20Red.png?raw=true "Darth vs Luke")
+![Darth vs Luke](/README_Assets/Darth_vs_Luke_-_Stimuli_Red.png?raw=true "Darth vs Luke")
 
 Turns out the suspicion that the *colour* is nowhere in the stimuli. One can hunt
 for hours trying to find a discrete sample of stimuli that in isolation can be
