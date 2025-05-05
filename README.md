@@ -17,7 +17,7 @@ the techniques included herein are entirely *effective*, we can expect
 no such correspondence beyond broad and hand wavy things. Always remember
 that we are adjusting normalized stimuli wattages when adjusting RGB, and
 as such, it's all mumbo jumbo janky in terms of what we are trying to control.
-No amount of misleading knobs, pulleys, widgets, wheels, and other ephermera,
+No amount of misleading knobs, pulleys, widgets, wheels, and other ephemera,
 no matter how much an author professes with language, will *affect* the
 cognized elements. The metrics of all curves are normalized RGB wattages,
 and as such, the curve formula employed herein is detached from the more
