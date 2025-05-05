@@ -82,10 +82,10 @@ any way, shape, or form.
 
 For the wise among you looking for a reasonable entry point, look to the
 neurophysiological gradients, and how they may rest at the feet of cognitive
-Cartesian-like constructions in our minds.
+Cartesian-like constructions of *spatial relationships between forms* in our minds. That is, avoid obsessing over faulty hunan crafted stimuli models or "colour spaces", and instead focus on how cognitition derives ***colour as space***.
 
-Feel free to read the worthless book entitled as such, but no answers rest
-in colourimetry nor any other practitioner of charlatanism.
+Feel free to read the worthless book entitled with the subject of this section, but no answers rest
+in colourimetric stimuli models, nor any other practitioner of charlatanism.
 
 In light of the above, it is worthwhile for folks to experiment with the
 handling of out of domain stimuli and the relationships to our cognition of
