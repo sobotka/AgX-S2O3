@@ -45,8 +45,7 @@ pictorial depictions](https://github.com/sobotka/scise/wiki/Picture-Formation).
 
 ## Additive Stimuli
 
-By using a simplistic matrix approach, we can add additive energy to the opponent stimuli. This relates to our segmentation-decomposition cogntive mechanisms, and formulates a cognitive "grammar" when a channel by channel
-lookup formula is employed.
+By using a simplistic matrix approach, we can add additive energy to the opponent stimuli. This relates to our segmentation-decomposition cognitive mechanisms, and formulates a cognitive "grammar" when a channel by channel lookup or formula is employed.
 
 ## Rotation and Control of the Basis Vectors
 
