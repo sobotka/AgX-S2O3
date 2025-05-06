@@ -36,7 +36,7 @@ what people think they control.**
 
 The original sigmoidal curve within this repository was originally authored by
 Jed Smith. It can be swapped out with anything that patterns a general
-sigmoidal response in theory.
+sigmoidal response in theory. The interactions that create the final stimuli triplet are complexly intertwined with several variables, and as such, no degree of "precision" can afford much utility.
 
 # Rotations, Insets, and Outsets
 
@@ -56,8 +56,8 @@ By using a simplistic matrix approach, we can add additive energy to the opponen
 ## Rotation and Control of the Basis Vectors
 
 Permitting an author to control the basis coordinates is key for authorship.
-Our cognitive machinations that yield segmentation-decomposition are unknown,
-and our models are extremely impoverished. As such, it is absolutely imperative
+Our cognitive machinations that yield segmentation-decomposition are, at best, poorly understood.
+Worse, our existing stimuli-centric models are extremely impoverished. As such, it is absolutely imperative
 that the picture formation approach allows an author to control the nature of
 the formation for their specific pictorial needs. At the same time, ergonomics
 are crucially important.
