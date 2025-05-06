@@ -14,9 +14,15 @@ the scripts felt in order.
 Generally speaking, the nature of the structure of some random curve
 is completely inconsequential in terms of an *affecting* force. Because
 the techniques included herein are entirely *effective*, we can expect
-no such correspondence beyond broad and hand wavy things. Always remember
-that we are adjusting normalized stimuli wattages when adjusting RGB, and
+no such correspondence beyond broad and hand wavy things. 
+
+***The stimuli (RGB wattage values) are disconnected from colour cognition in the way folks believe.***
+
+Always remember that we are adjusting normalized stimuli wattages when adjusting RGB, and
 as such, it's all mumbo jumbo janky in terms of what we are trying to control.
+
+*For example, adjusting an RGB value will not adjust the "hueness" of a colour. It will effect and change the "hueness", but the "hueness" **is not** "within" the stimuli (RGB) itself; "hueness" is the end result of a cognitive computation.*
+
 No amount of misleading knobs, pulleys, widgets, wheels, and other ephemera,
 no matter how much an author professes with language, will *affect* the
 cognized elements. The metrics of all curves are normalized RGB wattages,
