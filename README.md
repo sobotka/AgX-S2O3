@@ -21,7 +21,7 @@ no such correspondence beyond broad and hand wavy things. Changing the R stimuli
 Always remember that we are adjusting normalized stimuli wattages when adjusting RGB, and
 as such, it's all mumbo jumbo janky in terms of what we are trying to control. Authors seek to control colour, but colour is a cognitive computation. Sadly, it is akin to an author attempting to control a puppet, by way of pulleys and strings, while wearing a blindfold. Colour cognition does not "follow" from the RGB stimuli.
 
-*For example, adjusting an RGB value will not adjust the "hueness" of a colour. It will effect and change the "hueness", but the "hueness" **is not** "within" the stimuli (RGB) itself; "hueness" is the end result of a cognitive computation.*
+*For example, adjusting an RGB value will not adjust the "hueness" of a colour. It will effect and change the "hueness" of the *result*, but the "hueness" **is not** "controlled by" the stimuli (RGB) itself; "hueness" is the end result of a spatio-temporal cognitive computation.*
 
 No amount of misleading knobs, pulleys, widgets, wheels, and other ephemera,
 no matter how much an author professes with language, will *affect* the
