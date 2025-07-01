@@ -3,11 +3,25 @@
 You seem to have wandered well off of your path. Since you are lost, I leave
 the following breadcrumbs to help you find your way back...
 
+# Where
+
+The concepte in this repository are found in:
+* Adobe Substance Painter
+* Autodesk VRed
+* Autodesk Alias Studio
+* Marmoset Toolbag
+* Godot Game Engine
+* Blender
+* Avoyd Voxel Editor
+* Etc.
+
 # Why
 
 It seems the ideas in this archive have spread to places the author would
 never have guessed. A small document to help those who have tried to parse
 the scripts felt in order.
+
+The TL;DR is that [Picture Formation](https://github.com/sobotka/scise/wiki/Picture-Formation) formats the pictorial space.
 
 # Curves are Meaningless
 
