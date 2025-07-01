@@ -5,7 +5,7 @@ the following breadcrumbs to help you find your way back...
 
 # Where
 
-The concepte in this repository are found in:
+The concepts in this repository are found in:
 * Adobe Substance Painter
 * Autodesk VRed
 * Autodesk Alias Studio
